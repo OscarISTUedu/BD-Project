@@ -4,40 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список пациентов</title>
+    <style>
+        /* Основные стили для страницы */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: grid;
+            grid-template-columns: 10% auto;
+            margin-left:0px;
+            margin-top:0px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* Панель навигации слева */
+        .sidebar {
+            grid-column: 1;
+            width: 220px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px;
+            height: 100%;
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-size: 20px;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .sidebar ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Контент справа */
+        .content {
+            grid-column:2;
+            padding: 0 14em 0 14em;
+            justify-content: center;
+        }
+
+        /* Таблица */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px 10px; /* Уменьшены отступы для уменьшения ширины столбцов */
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px; /* Уменьшен размер шрифта */
+        }
+        thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        th:first-child, td:first-child {
+            border-left: none;
+        }
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            th, td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .sidebar {
+                width: 180px;
+            }
+            .content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Список пациентов</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Мед. карта</th>
-                <th>Мед. полис</th>
-                <th>Имя</th>
-                <th>Фамилия</th>
-                <th>Отчество</th>
-                <th>Пол</th>
-                <th>Дата рождения</th>
-                <th>Улица</th>
-                <th>Дом</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for patient in patients %}
+    <!-- Панель навигации -->
+    <div class="sidebar">
+        <h2>Меню</h2>
+        <ul>
+            <li><a href="#">Главная</a></li>
+            <li><a href="#">Пациенты</a></li>
+            <li><a href="#">Лечение</a></li>
+            <li><a href="#">Контакты</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Список пациентов</h1>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ patient.id }}</td>
-                    <td>{{ patient.med_card }}</td>
-                    <td>{{ patient.med_polys }}</td>
-                    <td>{{ patient.name }}</td>
-                    <td>{{ patient.surname }}</td>
-                    <td>{{ patient.third_name }}</td>
-                    <td>{{ patient.sex }}</td>
-                    <td>{{ patient.date_of_birth|date:"d.m.Y" }}</td>
-                    <td>{{ patient.street }}</td>
-                    <td>{{ patient.house }}</td>
+                    <th>ID</th>
+                    <th>Мед. карта</th>
+                    <th>Мед. полис</th>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Отчество</th>
+                    <th>Пол</th>
+                    <th>Дата рождения</th>
+                    <th>Улица</th>
+                    <th>Дом</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.id }}</td>
+                        <td>{{ patient.med_card }}</td>
+                        <td>{{ patient.med_polys }}</td>
+                        <td>{{ patient.name }}</td>
+                        <td>{{ patient.surname }}</td>
+                        <td>{{ patient.third_name }}</td>
+                        <td>{{ patient.sex }}</td>
+                        <td>{{ patient.date_of_birth|date:"d.m.Y" }}</td>
+                        <td>{{ patient.street }}</td>
+                        <td>{{ patient.house }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
