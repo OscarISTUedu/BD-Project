@@ -17,8 +17,8 @@ class Patient(models.Model):
     class Meta:
         managed = False
         db_table = 'Patient'
-        verbose_name = "Пациент"
-        verbose_name_plural = "Пациенты"
+        #verbose_name = "Пациент"
+        #verbose_name_plural = "Пациенты"
 
 class Neighborhood(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -26,26 +26,26 @@ class Neighborhood(models.Model):
     class Meta:
         managed = False
         db_table = 'Neighborhood'
-        verbose_name = "Район"
-        verbose_name_plural = "Районы"
+        #verbose_name = "Район"
+        #verbose_name_plural = "Районы"
 
-class Diagnosis(models.Model):
+class Diagnoses_list(models.Model):
     id = models.IntegerField(primary_key=True)
     diagnosis = models.CharField(max_length=100)
     class Meta:
         managed = False
-        db_table = 'Diagnosis'
-        verbose_name = "Диагноз"
-        verbose_name_plural = "Диагнозы"
+        db_table = 'Diagnoses_list'
+        #verbose_name = "Диагноз"
+        #verbose_name_plural = "Диагнозы"
 
-class Visit(models.Model):
+class Visit_list(models.Model):
     id = models.IntegerField(primary_key=True)
     visit = models.CharField(max_length=50)
     class Meta:
         managed = False
-        db_table = 'Visit'
-        verbose_name = "Цель визита"
-        verbose_name_plural = "Цели визита"
+        db_table = 'Visit_list'
+        #verbose_name = "Цель визита"
+        #verbose_name_plural = "Цели визита"
 
 class Doctor(models.Model):
     class Category(models.TextChoices):
@@ -63,8 +63,8 @@ class Doctor(models.Model):
     class Meta:
         managed = False
         db_table = 'Doctor'
-        verbose_name = "Доктор"
-        verbose_name_plural = "Доктора"
+        #verbose_name = "Доктор"
+        #verbose_name_plural = "Доктора"
 
 class Ticket(models.Model):
     class Status(models.TextChoices):
@@ -74,12 +74,12 @@ class Ticket(models.Model):
     date_n_time = models.DateTimeField()
     doctor = models.ForeignKey(Doctor,models.DO_NOTHING)
     patient = models.ForeignKey(Patient,models.DO_NOTHING)
-    visit = models.ForeignKey(Visit,models.DO_NOTHING)
-    diagnosis = models.ForeignKey(Diagnosis,models.DO_NOTHING,blank=True)
+    visit_list = models.ForeignKey(Visit_list,models.DO_NOTHING)
+    Diagnoses_list = models.ForeignKey(Diagnoses_list,models.DO_NOTHING,blank=True)
     status = models.CharField(max_length=10,choices=Status)
     class Meta:
         managed = False
         db_table = 'Ticket'
-        verbose_name = "Талон"
-        verbose_name_plural = "Талоны"
-        unique_together = [['id', 'date_n_time']]
+        #verbose_name = "Талон"
+        #verbose_name_plural = "Талоны"
+        #unique_together = [['id', 'date_n_time']]
