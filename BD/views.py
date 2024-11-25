@@ -1,5 +1,7 @@
-from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Patient
 
-
-def index(request):
-    return HttpResponse(str())
+def patient_list(request):
+    # Получаем все записи пациентов
+    patients = Patient.objects.all()
+    return render(request, 'patient_list.html', {'patients': patients})
