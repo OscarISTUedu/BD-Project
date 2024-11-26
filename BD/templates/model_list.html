@@ -134,12 +134,12 @@
                         {% for key,value in model.items %}
                         {% if value|date:"M-d-y" %}
                         <td>{{ value|date:"d-m-Y"}}</td>
-                        {% else %}
-                        {% if value %}
+                        {% elif value|date:"d-m-Y H:i:s"%}
+                        <td>{{ value|date:"d-m-Y H:i:s"}}</td>
+                        {% elif value %}
                         <td>{{ value }}</td>
                         {% else %}
-                         <td> - </td>
-                        {% endif %}
+                        <td> - </td>
                         {% endif %}
                         {% endfor %}
                     </tr>
