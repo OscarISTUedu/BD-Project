@@ -119,35 +119,29 @@
 
     <!-- Основной контент -->
     <div class="content">
-        <h1>Список пациентов</h1>
+        <h1>{{ h1 }}</h1>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Мед. карта</th>
-                    <th>Мед. полис</th>
-                    <th>Имя</th>
-                    <th>Фамилия</th>
-                    <th>Отчество</th>
-                    <th>Пол</th>
-                    <th>Дата рождения</th>
-                    <th>Улица</th>
-                    <th>Дом</th>
+                    {% for field in fields %}
+                    <th>{{field.verbose_name}}</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for patient in patients %}
+                {% for model in models %}
                     <tr>
-                        <td>{{ patient.id }}</td>
-                        <td>{{ patient.med_card }}</td>
-                        <td>{{ patient.med_polys }}</td>
-                        <td>{{ patient.name }}</td>
-                        <td>{{ patient.surname }}</td>
-                        <td>{{ patient.third_name }}</td>
-                        <td>{{ patient.sex }}</td>
-                        <td>{{ patient.date_of_birth|date:"d.m.Y" }}</td>
-                        <td>{{ patient.street }}</td>
-                        <td>{{ patient.house }}</td>
+                        {% for key,value in model.items %}
+                        {% if value|date:"M-d-y" %}
+                        <td>{{ value|date:"d-m-Y"}}</td>
+                        {% else %}
+                        {% if value %}
+                        <td>{{ value }}</td>
+                        {% else %}
+                         <td> - </td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
                     </tr>
                 {% endfor %}
             </tbody>
