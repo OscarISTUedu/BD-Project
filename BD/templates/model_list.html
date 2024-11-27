@@ -79,7 +79,7 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-        tr:hover {
+        tbody > tr:hover {
             background-color: #f1f1f1;
         }
         th:first-child, td:first-child {
@@ -111,9 +111,12 @@
         <h2>Меню</h2>
         <ul>
             <li><a href="#">Главная</a></li>
-            <li><a href="#">Пациенты</a></li>
-            <li><a href="#">Лечение</a></li>
-            <li><a href="#">Контакты</a></li>
+            <li><a href="/patients">Пациенты</a></li>
+            <li><a href="/doctors">Врачи</a></li>
+            <li><a href="/neighborhoods">Участки</a></li>
+            <li><a href="/diagnoses">Диагнозы</a></li>
+            <li><a href="/visits">Цели визита</a></li>
+            <li><a href="/tickets">Талоны посещения</a></li>
         </ul>
     </div>
 
@@ -132,10 +135,10 @@
                 {% for model in models %}
                     <tr>
                         {% for key,value in model.items %}
-                        {% if value|date:"M-d-y" %}
-                        <td>{{ value|date:"d-m-Y"}}</td>
-                        {% elif value|date:"d-m-Y H:i:s"%}
-                        <td>{{ value|date:"d-m-Y H:i:s"}}</td>
+                        {% if key == "date_of_birth" %}
+                        <td>{{value|date:"d-m-Y"}}</td>
+                        {% elif key == "date_n_time"%}
+                        <td>{{value|date:"d-m-Y H:i:s"}}</td>
                         {% elif value %}
                         <td>{{ value }}</td>
                         {% else %}

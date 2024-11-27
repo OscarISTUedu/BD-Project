@@ -26,8 +26,8 @@ class Neighborhood(models.Model):
     class Meta:
         managed = False
         db_table = 'Neighborhood'
-        verbose_name = "Район"
-        verbose_name_plural = "Районы"
+        verbose_name = "Участок"
+        verbose_name_plural = "Участки"
 
 class Diagnosis(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
@@ -63,8 +63,8 @@ class Doctor(models.Model):
     class Meta:
         managed = False
         db_table = 'Doctor'
-        verbose_name = "Доктор"
-        verbose_name_plural = "Доктора"
+        verbose_name = "Врач"
+        verbose_name_plural = "Врачи"
 
 class Ticket(models.Model):
     class Status(models.TextChoices):
