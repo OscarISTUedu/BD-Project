@@ -41,3 +41,6 @@ def ticket(request):
     fields = Ticket._meta.get_fields()
     return render(request, 'model_list.html',
                   {'models': tickets, 'h1': Ticket._meta.verbose_name_plural, 'fields': fields})
+
+def auth(request):
+    print(1)

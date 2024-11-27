@@ -1,3 +1,4 @@
+from django.contrib.auth.views import UserModel
 from django.db import models
 
 class Patient(models.Model):
