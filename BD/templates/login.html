@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в систему</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h2>Авторизация</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}  <!-- Отображение ошибок формы -->
+        <div>
+            {{ form.username.label_tag }}  <!-- Поле логина -->
+            {{ form.username }}
+        </div>
+        <div>
+            {{ form.password.label_tag }}  <!-- Поле пароля -->
+            {{ form.password }}
+        </div>
+        <button type="submit">Войти</button>
+    </form>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

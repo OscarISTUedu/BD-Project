@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список пациентов</title>
+    <title>Районная больница</title>
     <style>
         /* Основные стили для страницы */
         body {
@@ -40,7 +40,7 @@
         }
         .sidebar ul li {
             margin: 10px 0;
-            font-size: 16px;
+            font-size: 18px;
         }
         .sidebar ul li a {
             color: white;
@@ -89,6 +89,38 @@
             border-right: none;
         }
 
+        .user-panel {
+            background-color: #4CAF50;
+            width: 200px;
+            height: 100vh;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            grid-column:3;
+        }
+        .user-panel h2 {
+            margin-top: 0;
+        }
+        .user-panel ul {
+            list-style: none;
+            padding: 0;
+        }
+        .user-panel li {
+            margin: 15px 0;
+        }
+        .user-panel ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .user-panel ul li a:hover {
+            text-decoration: underline;
+        }
+        .square {
+            width: 100%;
+            height: auto;
+            border: 2px solid #333;
+            font-size: 18px;
+        }
         /* Адаптивность */
         @media (max-width: 600px) {
             th, td {
@@ -150,5 +182,25 @@
             </tbody>
         </table>
     </div>
+    <div class="user-panel">
+            {% if user.is_authenticated %}
+                <h2>{{user.username}}</h2>
+            <div class="square">
+                <p>Вы состоите в следующих группах:</p>
+                    <ul>
+                    {% for group in user.groups.all %}
+                        <li>{{ group.name }}</li>
+                    {% empty %}
+                        <li>Вы не состоите ни в одной группе</li>
+                    {% endfor %}
+                    </ul>
+            </div>
+            {% else %}
+                <h2>Пользователь</h2>
+             {% endif %}
+        <ul>
+            <li><a href="/logout">Выход</a></li>
+        </ul>
+        </div>
 </body>
 </html>
