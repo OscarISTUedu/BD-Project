@@ -50,45 +50,6 @@
             text-decoration: underline;
         }
 
-        /* Контент справа */
-        .content {
-            grid-column:2;
-            padding: 0 14em 0 14em;
-            justify-content: center;
-        }
-
-        /* Таблица */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px 10px; /* Уменьшены отступы для уменьшения ширины столбцов */
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px; /* Уменьшен размер шрифта */
-        }
-        thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tbody > tr:hover {
-            background-color: #f1f1f1;
-        }
-        th:first-child, td:first-child {
-            border-left: none;
-        }
-        th:last-child, td:last-child {
-            border-right: none;
-        }
-
         .user-panel {
             background-color: #4CAF50;
             width: 200px;
@@ -164,36 +125,6 @@
         </ul>
     </div>
 
-    <!-- Основной контент -->
-    <div class="content">
-        <h1>{{ h1 }}</h1>
-        <table>
-            <thead>
-                <tr>
-                    {% for field in fields %}
-                    <th>{{field.verbose_name}}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for model in models %}
-                    <tr>
-                        {% for key,value in model.items %}
-                        {% if key == "date_of_birth" %}
-                        <td>{{value|date:"d-m-Y"}}</td>
-                        {% elif key == "date_n_time"%}
-                        <td>{{value|date:"d-m-Y H:i:s"}}</td>
-                        {% elif value %}
-                        <td>{{ value }}</td>
-                        {% else %}
-                        <td> - </td>
-                        {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
     <div class="user-panel">
             {% if user.is_authenticated %}
                 <h2>{{user.username}}</h2>
