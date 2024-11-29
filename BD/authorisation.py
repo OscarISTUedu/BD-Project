@@ -7,13 +7,28 @@ DoctorGroup,flag = Group.objects.get_or_create(name='Врачи')
 PatientGroup,flag = Group.objects.get_or_create(name='Пациенты')
 AdminGroup,flag = Group.objects.get_or_create(name='Администрация')
 ReceptionGroup,flag = Group.objects.get_or_create(name='Регистратура')
-#Доктор
+#Врачи
 '''
 Просмотр - Врачи,Пациенты,Талон,Диагнозы
 Изменение - Талон
-Удаление
-Добавление
-
+'''
+#Пациенты
+'''
+Просмотр - Врачи,Участки
+'''
+#Регистратура
+'''
+Просмотр - Талон,Участки,Пациенты
+Изменение - Талон,Участки
+Удаление - Талон,Участки
+Добавление - Талон,Участки
+'''
+#Администратор
+'''
+Просмотр - Врачи,Талон,Участки,Пациенты,Диагнозы,Цели
+Изменение - Врачи,Талон,Участки,Пациенты,Диагнозы,Цели
+Удаление - Врачи,Талон,Участки,Пациенты,Диагнозы,Цели
+Добавление - Врачи,Талон,Участки,Пациенты,Диагнозы,Цели
 '''
 doctor_content_type = ContentType.objects.get_for_model(Doctor)
 patient_content_type = ContentType.objects.get_for_model(Patient)
