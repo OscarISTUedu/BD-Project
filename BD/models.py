@@ -83,4 +83,4 @@ class Ticket(models.Model):
         db_table = 'Ticket'
         verbose_name = "Талон"
         verbose_name_plural = "Талоны"
-        #unique_together = [['id', 'date_n_time']]
+        unique_together = [['id', 'date_n_time']]
