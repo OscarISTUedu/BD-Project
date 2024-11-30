@@ -1,8 +1,12 @@
+import json
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from django.apps import apps
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
 
 @permission_required('BD.view_patient')
@@ -70,3 +74,32 @@ def logout_view(request):
 
 def main_view(request):
     return render(request, 'main.html')
+
+@login_required
+def change_view(request):
+    data = json.loads(request.body)
+    verbose_name_plural = data.pop('table_verbose_name_plural')
+    verbose_name_field = data.pop('field_name')
+    new_data = data.pop('new_data')
+    row_id = data.pop('id')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == verbose_name_plural:
+            cur_model = model
+            break
+    fields = cur_model._meta.get_fields()
+    for field in fields:
+        if field.get_internal_type()!="ForeignKey":
+            if field.verbose_name == verbose_name_field:
+                cur_field = field.name
+                break
+    cur_obj = cur_model.objects.filter(id=row_id)[0]
+    #cur_model.objects.filter(id=row_id,cur_field=cur_obj.).update(field_name='new_value')
+    print(f"fields {fields}")
+    print(f"data {data}")
+    print(f"cur_field {cur_field}")
+    #print(cur_obj.cur_field)
+    print(f"new_data {new_data}")
+    #cur_obj.cur_field = new_data
+    #print(cur_obj.cur_field)
+    #cur_obj.save()
+    return HttpResponse(status=200)
