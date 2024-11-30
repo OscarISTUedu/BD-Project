@@ -1,5 +1,8 @@
-from django.contrib.auth.views import UserModel
+from django.core.validators import DecimalValidator, MaxLengthValidator
 from django.db import models
+
+from BD.validators import validate_house, validate_street, validate_birth
+
 
 class Patient(models.Model):
     class Sex(models.TextChoices):
@@ -12,9 +15,9 @@ class Patient(models.Model):
     surname = models.CharField(max_length=30,verbose_name="Фамилия")
     third_name = models.CharField(max_length=30,null=True,blank=True,verbose_name="Отчество")
     sex = models.CharField(max_length=10,choices=Sex,default=Sex.Man,verbose_name="Пол")
-    date_of_birth = models.DateField(verbose_name="Дата рождения")
-    street = models.CharField(max_length=100,verbose_name="Улица")
-    house = models.CharField(max_length=10,verbose_name="Дом")
+    date_of_birth = models.DateField(verbose_name="Дата рождения",validators=[validate_birth])
+    street = models.CharField(max_length=100,verbose_name="Улица",validators=[validate_street])
+    house = models.CharField(max_length=10,verbose_name="Дом",validators=[validate_house])
     class Meta:
         managed = False
         db_table = 'Patient'
@@ -59,7 +62,7 @@ class Doctor(models.Model):
     third_name = models.CharField(max_length=30,blank=True,null=True,verbose_name="Отчество")
     speciality = models.CharField(max_length=50,verbose_name="Специальность")
     category = models.CharField(max_length=10,choices=Category,blank=True,verbose_name="Категория")
-    salary = models.DecimalField(max_digits=8,decimal_places=2,verbose_name="Зарплата")
+    salary = models.DecimalField(max_digits=8,decimal_places=2,verbose_name="Зарплата",validators=[DecimalValidator(max_digits=8,decimal_places=2)])
     neighborhood = models.ForeignKey(Neighborhood,models.DO_NOTHING,verbose_name="Номер района")
     class Meta:
         managed = False
