@@ -24,7 +24,7 @@ function makeEditable(element) {
             {
                 dict_fields ={"sex":["Мужчина","Женщина"],"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
                 arr_fields = dict_fields[field];
-                createLanguageSelect(element,arr_fields);
+                createDropdown(element,arr_fields);
                 return
             }
             element.contentEditable = true;
@@ -86,35 +86,47 @@ function showPopup(text) {
         popup.setAttribute('id', 'popup');
         popup.innerText = text;
         popup.style.display = "flex";
-        popup.style.opacity = "1"; // сразу показываем, без задержки
+        popup.style.opacity = "1";
         errorsDiv.appendChild(popup);
-
         setTimeout(() => {
             popup.style.transition = "opacity 1s";
             popup.style.opacity = "0";
         }, 2000);
-
         setTimeout(() => {
             popup.remove();
-            resolve(); // завершаем promise, когда popup удалён
+            resolve();
         }, 3000);
     });
 }
 
-async function showPopups(text) {
-    await showPopup(text);
-}
+async function showPopups(text) {await showPopup(text);}
 
 
 function createDropdown(element,optionsArray) {
-  const select = document.createElement('select');
-  optionsArray.forEach(optionText => {
+  console.log(optionsArray);
+  new_td = document.createElement('td');
+  div_select_wrap = document.createElement('div');
+  div_select_wrap.setAttribute('class', 'select-wrapper');
+  div_select_arrow = document.createElement('div');
+  div_select_arrow.setAttribute('class', 'select-arrow-3');
+  select = document.createElement('select');
+  option_result = optionsArray.map((value) => {
+        return {
+            value: String(value),
+            text: String(value),
+            selected: false
+        };
+    });
+  console.log(option_result);
+  option_result.forEach(optionText => {
     const option = document.createElement('option');
-    option.value = optionText.toLowerCase().replace(/\s+/g, '_');  // Преобразуем текст в значение (например, "Option One" в "option_one")
-    option.textContent = optionText;  // Текст для отображения в выпадающем списке
-    select.appendChild(option);  // Добавляем <option> в <select>
+    option.value = option_result.value;
+    option.textContent = optionText.text;
+    select.appendChild(option);
   });
-  document.appendChild(select);
+  element.replaceWith(new_td);
+  new_td.appendChild(div_select_wrap);
+  div_select_wrap.appendChild(select);
 }
 
 function createLanguageSelect(element,option_list) {
