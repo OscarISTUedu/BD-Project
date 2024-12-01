@@ -2,7 +2,6 @@ import re
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 
 def validate_house(value):
     pattern = r'^[0-9]+[А-Яа-яЁё]*$'
@@ -41,7 +40,16 @@ def validate_birth(value):
         raise ValidationError("Не верный формат")
 
 def validate_third_name(value):
-    pattern = r'^\d{2}-\d{2}-\d{4}$'  # Формат "дд-мм-гггг"
+    pattern = r'^[А-ЯЁ][а-яё]+(вич|вна|ич|ична|ович|овна)$'
     if not (re.fullmatch(pattern, value)):
         raise ValidationError("Не верный формат")
 
+def validate_surname(value):
+    pattern = r'^[А-ЯЁ][а-яё]+(-[А-ЯЁ][а-яё]+)?$'  # Поддержка двойных фамилий через дефис
+    if not (re.fullmatch(pattern, value)):
+        raise ValidationError("Не верный формат")
+
+def validate_name(value):
+    pattern = r'^[А-ЯЁ][а-яё]+$'
+    if not (re.fullmatch(pattern, value)):
+        raise ValidationError("Не верный формат")
