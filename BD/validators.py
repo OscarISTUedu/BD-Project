@@ -19,7 +19,6 @@ def validate_street(value):
 
 def validate_birth(value):
     value_str = str(value)
-    print(value_str)
     pattern = r'^\d{4}-\d{2}-\d{2}$'  # Формат "дд-мм-гггг"
     if not (re.fullmatch(pattern, value_str)):
         raise ValidationError("Не верный формат")

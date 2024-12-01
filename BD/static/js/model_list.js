@@ -80,15 +80,20 @@ function handleEvent(event,element)
 
 
 function showPopup(text) {
-        var popup = document.getElementById("popup");
+        errorsDiv = document.querySelector('.errors');
+        popup = document.createElement('div');
+        popup.setAttribute('id', 'popup');
         popup.innerText = text;
-        popup.style.display = "block";
+        popup.style.display = "flex";
+        errorsDiv.appendChild(popup);
         setTimeout(function() {
+            popup.style.transition = "opacity 1s";
             popup.style.opacity = "0";
         }, 2000); setTimeout(function() {
-            popup.style.display = "none";popup.style.opacity=1;
+            popup.remove();
         }, 3000);
     }
+
 
 function createDropdown(element,optionsArray) {
   const select = document.createElement('select');
