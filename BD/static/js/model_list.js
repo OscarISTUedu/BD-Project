@@ -17,13 +17,13 @@ function makeEditable(element) {
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("change_"+model_dict[model]))
         {
-            let list_fields = ["sex","category","status"];
+            let list_fields = ["category","status"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
             if (list_fields.includes(field))
             {
                 element.focus();
-                dict_fields ={"sex":["Мужчина","Женщина"],"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
+                dict_fields ={"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
                 arr_fields = dict_fields[field];
                 createDropdown(element,arr_fields);
                 return
@@ -68,7 +68,6 @@ function requestTextUpdate (event,element)
       "field_name":field_name,
       "new_data":element.innerText,
     };
-    console.log(data)
     sendData(data,element);
 }
 

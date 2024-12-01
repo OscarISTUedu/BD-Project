@@ -54,7 +54,7 @@
                         {% elif key == "date_n_time"%}
                         <td ondblclick="makeEditable(this)" name="{{key}}">{{value|date:"Y-m-d H:i:s"}}</td>
                         {% elif value %}
-                        <td {%if key != "id" %} ondblclick="makeEditable(this)" name="{{key}}"{%endif%} >{{ value }}</td>
+                        <td {%if key != "id" and  key != "sex" %} ondblclick="makeEditable(this)" name="{{key}}"{%endif%} >{{ value }}</td>
                         {% else %}
                         <td ondblclick="makeEditable(this)" name="{{key}}"> - </td>
                         {% endif %}
