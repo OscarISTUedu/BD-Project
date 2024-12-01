@@ -22,6 +22,7 @@ def validate_street_neighborhood(value):
     pattern = r'^[А-Яа-яЁёA-Za-z\s]+(,\s*\d+)?$'
     if not(re.match(pattern, value)):
         raise ValidationError("Не верный формат")
+
 #Валидация даты
 def validate_birth(value):
     value_str = str(value)
@@ -65,5 +66,11 @@ def validate_name(value):
 #Валидация Врача
 def validate_speciality(value):
     pattern = r'^[А-ЯЁа-яё]+(\s?\([А-ЯЁа-яё\s-]+\))?$'
+    if not (re.fullmatch(pattern, value)):
+        raise ValidationError("Не верный формат")
+
+#Валидация Диагноза
+def validate_diagnosis(value):
+    pattern = r'.*(\b[А-Яа-яЁёA-Za-z0-9\s\-\,\.]+\b).*'
     if not (re.fullmatch(pattern, value)):
         raise ValidationError("Не верный формат")
