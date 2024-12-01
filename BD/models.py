@@ -63,7 +63,7 @@ class Doctor(models.Model):
     speciality = models.CharField(max_length=50,verbose_name="Специальность")
     category = models.CharField(max_length=10,choices=Category,blank=True,verbose_name="Категория")
     salary = models.DecimalField(max_digits=8,decimal_places=2,verbose_name="Зарплата",validators=[DecimalValidator(max_digits=8,decimal_places=2)])
-    neighborhood = models.ForeignKey(Neighborhood,models.DO_NOTHING,verbose_name="Номер района")
+    neighborhood = models.ForeignKey(Neighborhood,on_delete=models.PROTECT,verbose_name="Номер района")
     class Meta:
         managed = False
         db_table = 'Doctor'
@@ -76,10 +76,10 @@ class Ticket(models.Model):
         Secondary = "Вторичный"
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
     date_n_time = models.DateTimeField(verbose_name="Дата и время приёма")
-    doctor = models.ForeignKey(Doctor,models.DO_NOTHING,verbose_name="Номер доктора")
-    patient = models.ForeignKey(Patient,models.DO_NOTHING,verbose_name="Номер пациента")
-    visit = models.ForeignKey(Visit,models.DO_NOTHING,verbose_name="Номер цели посещения")
-    diagnosis = models.ForeignKey(Diagnosis,models.DO_NOTHING,null=True,blank=True,verbose_name="Номер диагноза")
+    doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE,verbose_name="Номер доктора")
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,verbose_name="Номер пациента")
+    visit = models.ForeignKey(Visit,on_delete=models.CASCADE,verbose_name="Номер цели посещения")
+    diagnosis = models.ForeignKey(Diagnosis,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Номер диагноза")
     status = models.CharField(max_length=10,choices=Status,verbose_name="Статус")
     class Meta:
         managed = False
