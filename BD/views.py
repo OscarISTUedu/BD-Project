@@ -136,6 +136,9 @@ def change_view(request):
                 doc_street = Neighborhood.objects.filter(id=cur_obj.doctor.id).first().neighborhood_street
                 if not pat_street==doc_street:#childModels - Пациент
                     return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к доктор не принимает этот район"}, status=500)
+
+            if cur_field_name == "neighborhood":#Изменение района для доктора, означает что все его записи для людей старого района удаляются
+                Ticket.objects.filter(doctor = cur_obj.id).delete()
             child_instance = childModels.objects.filter(id=new_data).first()
             try:
                 setattr(cur_obj, cur_field_name, child_instance)
