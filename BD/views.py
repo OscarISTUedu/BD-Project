@@ -44,7 +44,7 @@ def diagnoses_list(request):
 
 @permission_required('BD.view_visit')
 def visit_list(request):
-    visits = Visit.objects.objects.all().order_by('id').values()
+    visits = Visit.objects.all().order_by('id').values()
     fields = Visit._meta.get_fields()
     fields = fields[1:]
     return render(request, 'model_list.html',
