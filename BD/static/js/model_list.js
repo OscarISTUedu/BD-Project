@@ -68,7 +68,7 @@ function handleEvent(event,element)
         if (xhr.status!=304)
         {
             response = JSON.parse(xhr.responseText);
-            showPopup(response.response);
+            showPopups(response.response);
             element.classList.add('highlight-error');
             element.innerText = last_data;
             setTimeout(() => {element.classList.remove('highlight-error');}, 1000);
@@ -80,19 +80,30 @@ function handleEvent(event,element)
 
 
 function showPopup(text) {
-        errorsDiv = document.querySelector('.errors');
-        popup = document.createElement('div');
+    return new Promise((resolve) => {
+        const errorsDiv = document.querySelector('.errors');
+        const popup = document.createElement('div');
         popup.setAttribute('id', 'popup');
         popup.innerText = text;
         popup.style.display = "flex";
+        popup.style.opacity = "1"; // сразу показываем, без задержки
         errorsDiv.appendChild(popup);
-        setTimeout(function() {
+
+        setTimeout(() => {
             popup.style.transition = "opacity 1s";
             popup.style.opacity = "0";
-        }, 2000); setTimeout(function() {
+        }, 2000);
+
+        setTimeout(() => {
             popup.remove();
+            resolve(); // завершаем promise, когда popup удалён
         }, 3000);
-    }
+    });
+}
+
+async function showPopups(text) {
+    await showPopup(text);
+}
 
 
 function createDropdown(element,optionsArray) {
