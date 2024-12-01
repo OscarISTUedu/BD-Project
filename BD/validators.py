@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 
-#Валидация Пациента
+#Валидация адреса пациента
 def validate_house(value):
     pattern = r'^[0-9]+[А-Яа-яЁё]*$'
     if not(re.match(pattern, value)):
@@ -17,6 +17,12 @@ def validate_street(value):
     if not(Neighborhood.objects.filter(neighborhood_street=value).first()):
         raise ValidationError("Нет такой улицы")
 
+#Валидация адреса участка
+def validate_street_neighborhood(value):
+    pattern = r'^[А-Яа-яЁёA-Za-z\s]+(,\s*\d+)?$'
+    if not(re.match(pattern, value)):
+        raise ValidationError("Не верный формат")
+#Валидация даты
 def validate_birth(value):
     value_str = str(value)
     pattern = r'^\d{4}-\d{2}-\d{2}$'  # Формат "дд-мм-гггг"
@@ -40,6 +46,7 @@ def validate_birth(value):
     else:
         raise ValidationError("Не верный формат")
 
+#Валидация ФИО
 def validate_third_name(value):
     pattern = r'^[А-ЯЁ][а-яё]+(вич|вна|ич|ична|ович|овна)$'
     if not (re.fullmatch(pattern, value)):
@@ -56,7 +63,6 @@ def validate_name(value):
         raise ValidationError("Не верный формат")
 
 #Валидация Врача
-
 def validate_speciality(value):
     pattern = r'^[А-ЯЁа-яё]+(\s?\([А-ЯЁа-яё\s-]+\))?$'
     if not (re.fullmatch(pattern, value)):

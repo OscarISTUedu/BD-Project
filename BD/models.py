@@ -2,7 +2,7 @@ from django.core.validators import DecimalValidator, MaxLengthValidator
 from django.db import models
 
 from BD.validators import validate_house, validate_street, validate_birth, validate_third_name, validate_surname, \
-    validate_name, validate_speciality
+    validate_name, validate_speciality, validate_street_neighborhood
 
 
 class Patient(models.Model):
@@ -27,7 +27,7 @@ class Patient(models.Model):
 
 class Neighborhood(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    neighborhood_street = models.CharField(max_length=100,verbose_name="Улица",unique=True)
+    neighborhood_street = models.CharField(max_length=100,verbose_name="Улица",unique=True,validators=[validate_street_neighborhood])
     class Meta:
         managed = False
         db_table = 'Neighborhood'
@@ -70,14 +70,6 @@ class Doctor(models.Model):
         db_table = 'Doctor'
         verbose_name = "Врач"
         verbose_name_plural = "Врачи"
-
-class CommaDecimalField(models.DecimalField):
-    def to_python(self, value):
-        if isinstance(value, str):
-            value = value.replace(',', '.')
-        return super().to_python(value)
-    def validate(self, value):
-        super().validate(value)
 
 class Ticket(models.Model):
     class Status(models.TextChoices):
