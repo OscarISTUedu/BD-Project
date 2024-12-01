@@ -1,13 +1,14 @@
 import json
-
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
+from django.db.models import ManyToOneRel
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 from django.apps import apps
+
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
 
 @permission_required('BD.view_patient')
@@ -79,6 +80,7 @@ def main_view(request):
 @login_required
 def change_view(request):
     data = json.loads(request.body)
+    data_all = data.copy()
     request_type = data.pop('field')
     new_data = data.pop('new_data')
     if request_type == "text":
@@ -94,13 +96,16 @@ def change_view(request):
             break
     fields = cur_model._meta.get_fields()
     for field in fields:
-        if field.get_internal_type()!="ForeignKey":
+        if not isinstance(field, ManyToOneRel):
             if field.verbose_name == verbose_name_field:
                 cur_field = field.name
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
     if cur_obj:
-        setattr(cur_obj, cur_field, new_data)
+        try:
+            setattr(cur_obj, cur_field, new_data)
+        except Exception:
+            return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"}, status=500)
         try:
             cur_obj.full_clean()
             cur_obj.save()

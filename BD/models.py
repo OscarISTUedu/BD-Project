@@ -2,7 +2,7 @@ from django.core.validators import DecimalValidator, MaxLengthValidator
 from django.db import models
 
 from BD.validators import validate_house, validate_street, validate_birth, validate_third_name, validate_surname, \
-    validate_name
+    validate_name, validate_speciality
 
 
 class Patient(models.Model):
@@ -58,10 +58,10 @@ class Doctor(models.Model):
         Second = "Вторая"
         High = "Высшая"
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    name = models.CharField(max_length=20,verbose_name="Имя")
-    surname = models.CharField(max_length=30,verbose_name="Фамилия")
-    third_name = models.CharField(max_length=30,blank=True,null=True,verbose_name="Отчество")
-    speciality = models.CharField(max_length=50,verbose_name="Специальность")
+    name = models.CharField(max_length=20,verbose_name="Имя",validators=[validate_name])
+    surname = models.CharField(max_length=30,verbose_name="Фамилия",validators=[validate_surname])
+    third_name = models.CharField(max_length=30,blank=True,null=True,verbose_name="Отчество",validators=[validate_third_name])
+    speciality = models.CharField(max_length=50,verbose_name="Специальность",validators=[validate_speciality])
     category = models.CharField(max_length=10,choices=Category,blank=True,verbose_name="Категория")
     salary = models.DecimalField(max_digits=8,decimal_places=2,verbose_name="Зарплата",validators=[DecimalValidator(max_digits=8,decimal_places=2)])
     neighborhood = models.ForeignKey(Neighborhood,on_delete=models.PROTECT,verbose_name="Номер района")
@@ -70,6 +70,14 @@ class Doctor(models.Model):
         db_table = 'Doctor'
         verbose_name = "Врач"
         verbose_name_plural = "Врачи"
+
+class CommaDecimalField(models.DecimalField):
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = value.replace(',', '.')
+        return super().to_python(value)
+    def validate(self, value):
+        super().validate(value)
 
 class Ticket(models.Model):
     class Status(models.TextChoices):

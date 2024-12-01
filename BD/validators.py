@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 
+#Валидация Пациента
 def validate_house(value):
     pattern = r'^[0-9]+[А-Яа-яЁё]*$'
     if not(re.match(pattern, value)):
@@ -51,5 +52,12 @@ def validate_surname(value):
 
 def validate_name(value):
     pattern = r'^[А-ЯЁ][а-яё]+$'
+    if not (re.fullmatch(pattern, value)):
+        raise ValidationError("Не верный формат")
+
+#Валидация Врача
+
+def validate_speciality(value):
+    pattern = r'^[А-ЯЁа-яё]+(\s?\([А-ЯЁа-яё\s-]+\))?$'
     if not (re.fullmatch(pattern, value)):
         raise ValidationError("Не верный формат")

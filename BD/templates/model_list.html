@@ -46,7 +46,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for model in models %}
+            {% for model in models %}
+            {% load i18n %}
+            {% language "en" %}
                     <tr>
                         {% for key,value in model.items %}
                         {% if key == "date_of_birth" %}
@@ -60,7 +62,8 @@
                         {% endif %}
                         {% endfor %}
                     </tr>
-                {% endfor %}
+            {% endlanguage %}
+            {% endfor %}
             </tbody>
         </table>
         <script>
@@ -90,6 +93,7 @@
         </ul>
         <div class="errors"></div>
     </div>
-    <script src="{% static 'js/model_list.js' %}?v={{ timestamp }}"></script>
+    <script src="{% static 'js/model_list.js' %}"></script>
 </body>
 </html>
+<!-- ?v={{ timestamp }} -->
