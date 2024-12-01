@@ -1,9 +1,12 @@
+import datetime
 import json
+from idlelib.config_key import translate_key
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
-from django.db.models import ManyToOneRel
+from django.db.models import ManyToOneRel, ForeignKey
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
@@ -94,17 +97,69 @@ def change_view(request):
         if model._meta.verbose_name_plural == verbose_name_plural:
             cur_model = model
             break
+    is_foreign_key = False
     fields = cur_model._meta.get_fields()
     for field in fields:
         if not isinstance(field, ManyToOneRel):
             if field.verbose_name == verbose_name_field:
-                cur_field = field.name
+                if isinstance(field, ForeignKey):
+                    is_foreign_key = True
+                cur_field_name = field.name
+                cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
     if cur_obj:
+        if  is_foreign_key:
+            childModel_name_plural = getattr(cur_obj, cur_field_name)._meta.verbose_name_plural
+            for model in apps.get_models():
+                if model._meta.verbose_name_plural == childModel_name_plural:
+                    childModels = model
+                    break
+            try:
+                can_update = childModels.objects.filter(id=new_data).exists()
+            except ValueError as e:
+                return JsonResponse({"response": "Не верный формат данных"}, status=500)
+            if not can_update:
+                return JsonResponse({"response": "Данной записи в дочерней таблице не существует"}, status=500)
+            if cur_field_name == "doctor":
+                #меняем доктора у текущего пациента, берём район нового доктора из этого района берём улицу, сравниваем эту улицу и улицу у текущего пациента
+                pat_street = Patient.objects.filter(id=cur_obj.patient.id).first().street
+                pat_surname = Patient.objects.filter(id=cur_obj.patient.id).first().surname
+                doc_street = childModels.objects.filter(id=new_data).first().neighborhood.neighborhood_street
+                if not pat_street==doc_street:#childModels - Доктор
+                    return JsonResponse({"response": f"Данный доктор не сможет обслужить пациента {pat_surname} т.к пациент живёт в другом районе"}, status=500)
+
+            if cur_field_name == "patient":
+                #меняем пациента у текущего доктора, берём улицу нового пациента,берём район текущего доктора, из этго района берём улицу сравниваем эту улицу и улицу у текущего пациента
+                pat_street = childModels.objects.filter(id=new_data).first().street
+                doc_surname = Doctor.objects.filter(id=cur_obj.doctor.id).first().surname
+                doc_street = Neighborhood.objects.filter(id=cur_obj.doctor.id).first().neighborhood_street
+                if not pat_street==doc_street:#childModels - Пациент
+                    return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к доктор не принимает этот район"}, status=500)
+            child_instance = childModels.objects.filter(id=new_data).first()
+            try:
+                setattr(cur_obj, cur_field_name, child_instance)
+            except Exception as e:
+                return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},status=500)
+            try:
+                cur_obj.full_clean()
+                cur_obj.save()
+            except ValidationError as e:
+                return JsonResponse({"response": e.messages[0]}, status=500)
+            return HttpResponse(status=200)
+        if cur_field=="status":
+            cur_pat = cur_obj.patient
+            cur_doc = cur_obj.doctor
+            tickets_for_cur_pat = Ticket.objects.filter(patient=cur_pat,doctor = cur_doc)
+            if tickets_for_cur_pat.exists() and new_data=="Первичный":#если предыдущие записи не найдены, значит данный приём первичный
+                return JsonResponse({"response": "Статус не может быть вторичный,данный пациент не посещял этого врача"}, status=500)
+            for ticket in tickets_for_cur_pat:#если найдены предыдущие записи у того же врача,у них есть диагноз значит данный приём вторичный
+                if not (ticket.diagnosis and new_data== "Вторичный"):
+                    return JsonResponse({"response": "Статус не может быть первичным,данный пациент уже посещял этого врача"}, status=500)
         try:
-            setattr(cur_obj, cur_field, new_data)
-        except Exception:
+            setattr(cur_obj, cur_field_name, new_data)
+        except Exception as e:
+            print(str(e))
             return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"}, status=500)
         try:
             cur_obj.full_clean()
@@ -114,20 +169,3 @@ def change_view(request):
     else:
         return JsonResponse({'error_message': cur_model+" с id="+row_id+" не существует"},status=500)
     return HttpResponse(status=200)
-
-def patient_for_doctor(patient_street,doctor_neighbourhood_id):
-    '''
-    patient_street - улица пациента
-    doctor_neighbourhood_id - участок врача
-    Проверка совпадает ли улица в участке врача с улицой пациента
-    '''
-    cur_pat = Patient.object.filter(street=patient_street).first()
-    if not cur_pat:
-        return False
-    cur_nei_doctor = Neighborhood.object.filter(id=doctor_neighbourhood_id).first()
-    if not cur_nei_doctor:
-        return False
-    cur_street_doctor = cur_nei_doctor.street
-    if (patient_street==cur_street_doctor):
-        return True
-    return False
