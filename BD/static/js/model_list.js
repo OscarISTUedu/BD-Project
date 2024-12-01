@@ -22,6 +22,7 @@ function makeEditable(element) {
             field = element.getAttribute("Name");
             if (list_fields.includes(field))
             {
+                element.focus();
                 dict_fields ={"sex":["Мужчина","Женщина"],"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
                 arr_fields = dict_fields[field];
                 createDropdown(element,arr_fields);
@@ -30,32 +31,53 @@ function makeEditable(element) {
             element.contentEditable = true;
             element.focus();
             enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
-            element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; handleEvent(event, element);}}
-            element.onblur = (event) => {if (!enterIsPressed) {handleEvent(event, element)} enterIsPressed = false;}
+            element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
+            element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
         }
     }
 }
 
-function handleEvent(event,element)
+function requestListUpdate (event,element,element_parent,text)
 {
-    element.contentEditable = false;
-    csrfToken = getCsrfToken();
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/change/", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-    parentElement = element.parentElement;
-    children = parentElement.children;
+    children = element_parent.children;
     index = Array.prototype.indexOf.call(children, element);
-    thead = document.querySelector('thead').children[0];
+    thead = document.querySelector('thead').firstElementChild;
     field_name = thead.children[index].innerText;
     let data = {
+      "field":"list",
+      "table_verbose_name_plural": model,
+      "id": element.parentElement.firstElementChild.innerText,
+      "field_name":field_name,
+      "new_data":text,
+    };
+    sendData(data,element);
+}
+
+function requestTextUpdate (event,element)
+{
+    element.contentEditable = false;
+    children = element.parentElement.children;
+    index = Array.prototype.indexOf.call(children, element);
+    thead = document.querySelector('thead').firstElementChild;
+    field_name = thead.children[index].innerText;
+    let data = {
+      "field":"text",
       "last_data":last_data,
       "table_verbose_name_plural": model,
       "id": element.parentElement.firstElementChild.innerText,
       "field_name":field_name,
       "new_data":element.innerText,
     };
+    console.log(data)
+    sendData(data,element);
+}
+
+function sendData(data,element) {
+    csrfToken = getCsrfToken();
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/change/", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("X-CSRFToken", csrfToken);
     let jsonData = JSON.stringify(data);
     xhr.onload = function ()
     {
@@ -63,7 +85,6 @@ function handleEvent(event,element)
       if (xhr.responseText!="")
             {let response = {};
             response = JSON.parse(xhr.responseText);}
-            console.log("error");
       } else  {
         if (xhr.status!=304)
         {
@@ -77,7 +98,6 @@ function handleEvent(event,element)
     };
     xhr.send(jsonData);
 }
-
 
 function showPopup(text) {
     return new Promise((resolve) => {
@@ -103,7 +123,6 @@ async function showPopups(text) {await showPopup(text);}
 
 
 function createDropdown(element,optionsArray) {
-  console.log(optionsArray);
   new_td = document.createElement('td');
   div_select_wrap = document.createElement('div');
   div_select_wrap.setAttribute('class', 'select-wrapper');
@@ -112,41 +131,29 @@ function createDropdown(element,optionsArray) {
   select = document.createElement('select');
   option_result = optionsArray.map((value) => {
         return {
-            value: String(value),
             text: String(value),
             selected: false
         };
     });
-  console.log(option_result);
   option_result.forEach(optionText => {
     const option = document.createElement('option');
-    option.value = option_result.value;
     option.textContent = optionText.text;
     select.appendChild(option);
   });
+  select.selectedIndex = -1;
+  par_el = element.parentElement;
   element.replaceWith(new_td);
   new_td.appendChild(div_select_wrap);
   div_select_wrap.appendChild(select);
-}
-
-function createLanguageSelect(element,option_list) {
-    select = document.createElement('select');
-    select.setAttribute('size', option_list.length);
-    option_result = option_list.map((value) => {
-        return {
-            value: value,
-            text: value,
-            selected: false
-        };
-    });
-    option_result.forEach(language => {
-        const option = document.createElement('option');
-        option.value = option_result.value;
-        option.textContent = language.text;
-        if (language.selected) {
-            option.selected = true;
-        }
-        select.appendChild(option);
-    });
-    element.replaceWith(select);
+  select.addEventListener('change', function(event) {
+    options_arr = event.target.getElementsByTagName('option')
+    for (let cur_option of options_arr)
+    {
+        if (cur_option.selected)
+            {
+            requestListUpdate(event,new_td,par_el,cur_option.text)
+            break;
+            }
+    }
+});
 }

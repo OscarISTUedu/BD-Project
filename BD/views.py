@@ -79,10 +79,12 @@ def main_view(request):
 @login_required
 def change_view(request):
     data = json.loads(request.body)
+    request_type = data.pop('field')
     new_data = data.pop('new_data')
-    last_data = data.pop('last_data')
-    if new_data==last_data:
-        return HttpResponse(status=304)
+    if request_type == "text":
+        last_data = data.pop('last_data')
+        if new_data==last_data:
+            return HttpResponse(status=304)
     verbose_name_plural = data.pop('table_verbose_name_plural')
     verbose_name_field = data.pop('field_name')
     row_id = data.pop('id')
