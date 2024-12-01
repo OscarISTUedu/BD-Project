@@ -26,7 +26,7 @@ class Patient(models.Model):
 
 class Neighborhood(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    neighborhood_street = models.CharField(max_length=100,verbose_name="Улица")
+    neighborhood_street = models.CharField(max_length=100,verbose_name="Улица",unique=True)
     class Meta:
         managed = False
         db_table = 'Neighborhood'
@@ -35,7 +35,7 @@ class Neighborhood(models.Model):
 
 class Diagnosis(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    diagnosis = models.CharField(max_length=100,verbose_name="Диагноз")
+    diagnosis = models.CharField(max_length=100,verbose_name="Диагноз",unique=True)
     class Meta:
         managed = False
         db_table = 'Diagnosis'
@@ -44,7 +44,7 @@ class Diagnosis(models.Model):
 
 class Visit(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    visit = models.CharField(max_length=50,verbose_name="Цель визита")
+    visit = models.CharField(max_length=50,verbose_name="Цель визита",unique=True)
     class Meta:
         managed = False
         db_table = 'Visit'
