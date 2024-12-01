@@ -74,3 +74,8 @@ def validate_diagnosis(value):
     pattern = r'.*(\b[А-Яа-яЁёA-Za-z0-9\s\-\,\.]+\b).*'
     if not (re.fullmatch(pattern, value)):
         raise ValidationError("Не верный формат")
+
+def validate_visit(value):
+    pattern = r'^[А-Яа-яЁё]+( [А-Яа-яЁё]+)*$'
+    if not (re.fullmatch(pattern, value)):
+        raise ValidationError("Не верный формат")

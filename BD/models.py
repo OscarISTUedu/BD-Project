@@ -2,7 +2,7 @@ from django.core.validators import DecimalValidator, MaxLengthValidator
 from django.db import models
 
 from BD.validators import validate_house, validate_street, validate_birth, validate_third_name, validate_surname, \
-    validate_name, validate_speciality, validate_street_neighborhood, validate_diagnosis
+    validate_name, validate_speciality, validate_street_neighborhood, validate_diagnosis, validate_visit
 
 
 class Patient(models.Model):
@@ -45,7 +45,7 @@ class Diagnosis(models.Model):
 
 class Visit(models.Model):
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    visit = models.CharField(max_length=50,verbose_name="Цель визита",unique=True)
+    visit = models.CharField(max_length=50,verbose_name="Цель визита",unique=True,validators=[validate_visit])
     class Meta:
         managed = False
         db_table = 'Visit'
