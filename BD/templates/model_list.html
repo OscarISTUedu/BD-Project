@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
-    <link rel="stylesheet" href="{% static 'css/model_list.css'%}">
+    <link rel="stylesheet" href="{% static 'css/model_list.css'%}?v={{ timestamp }}">
 </head>
 <body>
     <!-- Панель навигации -->
@@ -72,6 +72,9 @@
             const user_perm = "{{ user.get_all_permissions|join:", "}}";
         </script>
     </div>
+    <!-- Плюсик для добавления данных -->
+    <div class="plus radius"></div>
+    <!-- Аккаунт пользователя -->
     <div class="user-panel">
             {% if user.is_authenticated %}
                 <h2>{{user.username}}</h2>

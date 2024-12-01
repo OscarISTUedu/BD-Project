@@ -43,10 +43,10 @@ h1 {
     text-decoration: underline;
 }
 
-/* Контент справа */
+/* Таблицы */
 .content {
     grid-column:2;
-    padding: 0 14em 0 14em;
+    padding: 0 0 0 14em;
     justify-content: center;
 }
 
@@ -81,7 +81,27 @@ th:first-child, td:first-child {
 th:last-child, td:last-child {
     border-right: none;
 }
+/* Кнопка добавления */
+.plus {
+  align-items: start;
+  display:inline-block;
+  margin-top: 2vw;
+  width:40px;
+  height:40px;
 
+  background:
+    linear-gradient(#fff,#fff),/* Линии на кнопке */
+    linear-gradient(#fff,#fff),
+    #00cc00;                    /* Основной фон кнопки (зелёный) */
+  background-position:center;
+  background-size: 50% 2px,2px 50%;  /* Толщина = 2px, длина = 50% */
+  background-repeat:no-repeat;
+}
+.radius {
+  border-radius:50%;
+}
+
+/* Аккаунт пользователя */
 .user-panel {
     background-color: #4CAF50;
     width: 200px;
@@ -89,7 +109,7 @@ th:last-child, td:last-child {
     color: white;
     padding: 20px;
     box-sizing: border-box;
-    grid-column:3;
+    grid-column:4;
 }
 .user-panel h2 {
     margin-top: 0;
