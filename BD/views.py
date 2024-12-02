@@ -108,7 +108,7 @@ def change_view(request):
                 cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
-    if cur_obj:
+    if cur_obj:#если сущ-ет то меняем, если нет то добавляем
         if  is_foreign_key:
             childModel_name_plural = getattr(cur_obj, cur_field_name)._meta.verbose_name_plural
             for model in apps.get_models():
@@ -170,5 +170,15 @@ def change_view(request):
         except ValidationError as e:
             return JsonResponse({"response":e.messages[0]},status=500)
     else:
-        return JsonResponse({'error_message': cur_model+" с id="+row_id+" не существует"},status=500)
+        return JsonResponse({'error_message': str(cur_model) + " с id="+row_id+" не существует"},status=500)
     return HttpResponse(status=200)
+
+def add_empty_row(request):
+    data = json.loads(request.body)
+    verbose_name_plural = data.pop('table_verbose_name_plural')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == verbose_name_plural:
+            cur_model = model
+            break
+    last_obj = cur_model.objects.last().id
+    return JsonResponse({"id":last_obj+1},status=200)

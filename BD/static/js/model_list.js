@@ -3,7 +3,7 @@ function getCsrfToken() {
   if (match) return match;
   return null;
 }
-function makeEditable(element) {
+function makeEditable(element,isEmpty) {
     if (user_group != "Пациенты")
     {
         const user_perm_arr_BD = user_perm.split(", ");
@@ -50,7 +50,7 @@ function requestListUpdate (event,element,element_parent,text)
       "field_name":field_name,
       "new_data":text,
     };
-    sendData(data,element);
+    sendData(data,element,"POST", "/change/",false);
 }
 
 function requestTextUpdate (event,element)
@@ -68,34 +68,35 @@ function requestTextUpdate (event,element)
       "field_name":field_name,
       "new_data":element.innerText,
     };
-    sendData(data,element);
+    sendData(data,element,"POST", "/change/",false);
 }
 
-function sendData(data,element) {
-    csrfToken = getCsrfToken();
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/change/", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-    let jsonData = JSON.stringify(data);
-    xhr.onload = function ()
-    {
-      if (xhr.status == 200) {
-      if (xhr.responseText!="")
-            {let response = {};
-            response = JSON.parse(xhr.responseText);}
-      } else  {
-        if (xhr.status!=304)
-        {
-            response = JSON.parse(xhr.responseText);
-            showPopups(response.response);
-            element.classList.add('highlight-error');
-            element.innerText = last_data;
-            setTimeout(() => {element.classList.remove('highlight-error');}, 1000);
-        }
-      }
-    };
-    xhr.send(jsonData);
+function sendData(data, element, method, dir, isReturn) {
+    return new Promise((resolve, reject) => {
+        csrfToken = getCsrfToken();
+        let xhr = new XMLHttpRequest();
+        xhr.open(method, dir, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        let jsonData = JSON.stringify(data);
+        xhr.onload = function () {
+            let response;
+            if (xhr.status == 200 && isReturn) {
+                response = JSON.parse(xhr.responseText);
+                resolve(response); // Разрешаем промис с данными ответа
+            } else {
+                if (xhr.status != 304) {
+                    response = JSON.parse(xhr.responseText);
+                    showPopups(response.response);
+                    element.classList.add('highlight-error');
+                    element.innerText = last_data;
+                    setTimeout(() => { element.classList.remove('highlight-error'); }, 1000);
+                    reject(response); // Отклоняем промис с ошибкой
+                }
+            }
+        };
+        xhr.send(jsonData);
+    });
 }
 
 function showPopup(text) {
@@ -155,4 +156,25 @@ function createDropdown(element,optionsArray) {
             }
     }
 });
+}
+
+function MakeAddingRow(element){
+    let tableBody = document.querySelector('table tbody');
+    let newRow = document.createElement('tr');
+    let columnCount = tableBody.rows[0] ? tableBody.rows[0].cells.length : 0;
+    sendData({"table_verbose_name_plural":model},element,"POST", "/addEmpty/", true)//теперь есть новая пустая запись, с последним id
+     .then(response => {
+            //new_id = response.last_id; // Например, если сервер возвращает `last_id`
+            new_id = response.id
+            for (let i = 0; i < columnCount; i++) {
+                let newCell = document.createElement('td');
+                newCell.ondblclick = function() { makeEditable(this, true); };
+                if (i==0) {newCell.textContent=new_id} else newCell.textContent = '-';
+                newRow.appendChild(newCell);
+            }
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+        })
+        .catch(error => {
+            console.error('Ошибка при добавлении строки:', error);
+        });
 }
