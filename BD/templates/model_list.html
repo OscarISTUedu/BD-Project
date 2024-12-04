@@ -52,13 +52,13 @@
                     <tr>
                         {% for key,value in model.items %}
                         {% if key == "date_of_birth" %}
-                        <td ondblclick="makeEditable(this,false)" name="{{key}}">{{value|date:"Y-m-d"}}</td>
+                        <td ondblclick="makeEditable(this)" name="{{key}}">{{value|date:"Y-m-d"}}</td>
                         {% elif key == "date_n_time"%}
-                        <td ondblclick="makeEditable(this,false)" name="{{key}}">{{value|date:"Y-m-d H:i:s"}}</td>
+                        <td ondblclick="makeEditable(this)" name="{{key}}">{{value|date:"Y-m-d H:i:s"}}</td>
                         {% elif value %}
-                        <td {%if key != "id" and  key != "sex" %} ondblclick="makeEditable(this,false)" name="{{key}}"{%endif%} >{{ value }}</td>
+                        <td {%if key != "id" and  key != "sex" %} ondblclick="makeEditable(this)" name="{{key}}"{%endif%} >{{ value }}</td>
                         {% else %}
-                        <td ondblclick="makeEditable(this,false)" name="{{key}}"> - </td>
+                        <td ondblclick="makeEditable(this)" name="{{key}}"> - </td>
                         {% endif %}
                         {% endfor %}
                     </tr>
@@ -70,6 +70,7 @@
             const user_group = "{{ user.groups.all|join:", "}}";
             const model = "{{ h1 }}";
             const user_perm = "{{ user.get_all_permissions|join:", "}}";
+            new_row = {};
         </script>
     </div>
     <!-- Плюсик для добавления данных -->

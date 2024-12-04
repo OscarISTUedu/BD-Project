@@ -3,7 +3,7 @@ function getCsrfToken() {
   if (match) return match;
   return null;
 }
-function makeEditable(element,isEmpty) {
+function makeEditable(element) {//при клике на ячейку она становится редактируемой
     if (user_group != "Пациенты")
     {
         const user_perm_arr_BD = user_perm.split(", ");
@@ -20,17 +20,21 @@ function makeEditable(element,isEmpty) {
             let list_fields = ["category","status"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
-            if (list_fields.includes(field))
+            if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
             {
                 element.focus();
                 dict_fields ={"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
                 arr_fields = dict_fields[field];
-                createDropdown(element,arr_fields);
+                createDropdown(element,arr_fields);//то создаётся выпадающий список
                 return
             }
             element.contentEditable = true;
             element.focus();
             enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
+            /*при потере фокуса, идёт поиск данной строки в БД,
+            идёт попытка присвоить полю новое значение,
+            если успешно то записывается,иначе возвращает ошибку
+             */
             element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
             element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
         }
@@ -168,7 +172,7 @@ function MakeAddingRow(element){
             new_id = response.id
             for (let i = 0; i < columnCount; i++) {
                 let newCell = document.createElement('td');
-                newCell.ondblclick = function() { makeEditable(this, true); };
+                newCell.ondblclick = function() { FillRow(this); };
                 if (i==0) {newCell.textContent=new_id} else newCell.textContent = '-';
                 newRow.appendChild(newCell);
             }
@@ -177,4 +181,28 @@ function MakeAddingRow(element){
         .catch(error => {
             console.error('Ошибка при добавлении строки:', error);
         });
+}
+
+function FillRow(element){//редактируем поля
+    let list_fields = ["category","status"];
+    last_data = element.innerText;
+    field = element.getAttribute("Name");
+    if (list_fields.includes(field))
+    {
+        element.focus();
+        dict_fields ={"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
+        arr_fields = dict_fields[field];
+        createDropdown(element,arr_fields);
+        return
+    }ъ
+    element.contentEditable = true;
+    element.focus();
+    enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
+    /*
+    Проверка валидности,если норм то оставляем в ячейке,
+    иначе анимируем красным цветом, и оставляем пред-ее значение,
+    если поле валидно, то проверяем все поля если все поля валидны то сораняем
+    */
+    element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
+    element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
 }
