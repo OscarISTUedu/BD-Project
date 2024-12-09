@@ -14,4 +14,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('change/', views.change_view, name='change'),
     path('addEmpty/', views.add_empty_row, name='addEmpty'),
+    path('get_fields_by_name/', views.get_fields_by_name, name='get_fields_by_name'),
 ]

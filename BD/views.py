@@ -61,14 +61,17 @@ def ticket_list(request):
     Patient.objects.filter()
     fields = Ticket._meta.get_fields()
     for ticket in tickets:
-        diagnosis = Diagnosis.objects.filter(id=ticket.get('diagnosis_id')).first().diagnosis
+        if ticket.get('diagnosis_id'):
+            diagnosis = Diagnosis.objects.filter(id=ticket.get('diagnosis_id')).first().diagnosis
+        else:
+            diagnosis = None
         visit = Visit.objects.filter(id=ticket.get('visit_id')).first().visit
         patient = Patient.objects.filter(id=ticket.get('patient_id')).first().surname
         doctor = Doctor.objects.filter(id=ticket.get('doctor_id')).first().surname
-        ticket['diagnosis_id'] = Diagnosis.objects.filter(id=ticket.get('diagnosis_id')).first().diagnosis
-        ticket['visit_id'] =  Visit.objects.filter(id=ticket.get('visit_id')).first().visit
-        ticket['patient_id'] = Patient.objects.filter(id=ticket.get('patient_id')).first().surname +","+ str(ticket['patient_id'])
-        ticket['doctor_id'] = Doctor.objects.filter(id=ticket.get('doctor_id')).first().surname +","+ str(ticket['doctor_id'])
+        ticket['diagnosis_id'] = diagnosis
+        ticket['visit_id'] =  visit
+        ticket['patient_id'] = patient +","+"№"+str(ticket['patient_id'])
+        ticket['doctor_id'] = doctor +","+ "№"+str(ticket['doctor_id'])
     return render(request, 'model_list.html',
                   {'models': tickets, 'h1': Ticket._meta.verbose_name_plural, 'fields': fields})
 
@@ -224,4 +227,14 @@ def validate_field (request):
     cur_obj.delete()
     return JsonResponse ({cur_field_name:new_data},status=200)
 
-
+def get_fields_by_name(request):
+    data = json.loads(request.body)
+    field_name = data.pop('field_name')
+    model_name = data.pop('model_name')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == model_name:
+            cur_model = model
+            break
+    values = cur_model.objects.values_list(field_name,flat=True).distinct()
+    values = [val for val in values]
+    return JsonResponse({"values": values}, status=200)

@@ -18,15 +18,19 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("change_"+model_dict[model]))
         {
-            let list_fields = ["category","status"];
+            let list_fields = ["category","status","street"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
             if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
             {
                 element.focus();
-                dict_fields ={"category":["Первая","Вторая","Высшая"],"status":["Первичный","Вторичный"]};
-                arr_fields = dict_fields[field];
-                createDropdown(element,arr_fields);//то создаётся выпадающий список
+                sendData({"field_name":field,"model_name":model},element,"POST", "/get_fields_by_name/", true)
+                .then(response => {
+                createDropdown(element,response.values);//то создаётся выпадающий список
+                })
+                .catch(error => {
+                console.error('Ошибка: ', error);
+                });
                 return
             }
             element.contentEditable = true;
@@ -34,8 +38,7 @@ function makeEditable(element) {//при клике на ячейку она с�
             enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
             /*при потере фокуса, идёт поиск данной строки в БД,
             идёт попытка присвоить полю новое значение,
-            если успешно то записывается,иначе возвращает ошибку
-             */
+            если успешно то записывается,иначе возвращает ошибку*/
             element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
             element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
         }
@@ -130,8 +133,7 @@ async function showPopups(text) {await showPopup(text);}
 function createDropdown(element,optionsArray) {
   new_td = document.createElement('td');
   select = document.createElement('select');
-  select.setAttribute('class', 'js-example-basic-single');
-  select.setAttribute('name', 'state');
+  select.setAttribute('id', 'base');
   option_result = optionsArray.map((value) => {
         return {
             text: String(value),
@@ -149,8 +151,9 @@ function createDropdown(element,optionsArray) {
   element.replaceWith(new_td);
   new_td.appendChild(select);
     $(document).ready(function() {
-        $('.js-example-basic-single').select2();
+        $('base').select2();
     });
+  /*
   select.addEventListener('change', function(event) {
     options_arr = event.target.getElementsByTagName('option')
     for (let cur_option of options_arr)
@@ -162,6 +165,7 @@ function createDropdown(element,optionsArray) {
             }
     }
 });
+*/
 }
 
 function MakeAddingRow(element){
@@ -222,7 +226,7 @@ function requestUpdateText (event,element,element_parent,text)
       "field_name":field_name,
       "new_data":text,
     };
-    sendData(data,element,"POST", "/change/",false)
+    sendData(data,element,"POST", "/change/",true)
     .then(response => {
             new_id = response.id
             for (let i = 0; i < columnCount; i++) {

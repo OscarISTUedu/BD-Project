@@ -80,7 +80,7 @@ class Ticket(models.Model):
     doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE,verbose_name="Врач,номер")
     patient = models.ForeignKey(Patient,on_delete=models.CASCADE,verbose_name="Пациент,номер")
     visit = models.ForeignKey(Visit,on_delete=models.CASCADE,verbose_name="Цель посещения")
-    diagnosis = models.ForeignKey(Diagnosis,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Диагноза")
+    diagnosis = models.ForeignKey(Diagnosis,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Диагнозы")
     status = models.CharField(max_length=10,choices=Status,verbose_name="Статус")
     class Meta:
         managed = False
