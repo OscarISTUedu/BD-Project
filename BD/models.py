@@ -77,10 +77,10 @@ class Ticket(models.Model):
         Secondary = "Вторичный"
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
     date_n_time = models.DateTimeField(verbose_name="Дата и время приёма")
-    doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE,verbose_name="Номер доктора")
-    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,verbose_name="Номер пациента")
-    visit = models.ForeignKey(Visit,on_delete=models.CASCADE,verbose_name="Номер цели посещения")
-    diagnosis = models.ForeignKey(Diagnosis,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Номер диагноза")
+    doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE,verbose_name="Врач,номер")
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,verbose_name="Пациент,номер")
+    visit = models.ForeignKey(Visit,on_delete=models.CASCADE,verbose_name="Цель посещения")
+    diagnosis = models.ForeignKey(Diagnosis,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Диагноза")
     status = models.CharField(max_length=10,choices=Status,verbose_name="Статус")
     class Meta:
         managed = False

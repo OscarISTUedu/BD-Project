@@ -146,10 +146,11 @@ th:last-child, td:last-child {
   background-color: red;
   animation: highlight 1s ease-out forwards;
 }
+/*
 select {
-    height: auto; /* автоматическая высота, чтобы убрался скролл */
-    overflow-y: hidden; /* скрыть вертикальный скролл */
-}
+    height: auto; //автоматическая высота, чтобы убрался скролл
+    overflow-y: hidden; //скрыть вертикальный скролл
+}*/
 #popup {
     top: 20px;
     right: 20px;
@@ -165,7 +166,7 @@ select {
     display:flex;
     flex-flow:row-reverse wrap;
 }
-
+/*
 .select-wrapper {
   position: relative;
   width: auto;
@@ -183,7 +184,7 @@ select {
   background: transparent;
   border: 0;
 }
-
+*/
 
 /* Адаптивность */
 @media (max-width: 600px) {

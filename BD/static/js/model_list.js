@@ -1,3 +1,4 @@
+
 function getCsrfToken() {
   let match = document.cookie.split('csrftoken=')[1];
   if (match) return match;
@@ -128,14 +129,13 @@ async function showPopups(text) {await showPopup(text);}
 
 function createDropdown(element,optionsArray) {
   new_td = document.createElement('td');
-  div_select_wrap = document.createElement('div');
-  div_select_wrap.setAttribute('class', 'select-wrapper');
-  div_select_arrow = document.createElement('div');
-  div_select_arrow.setAttribute('class', 'select-arrow-3');
   select = document.createElement('select');
+  select.setAttribute('class', 'js-example-basic-single');
+  select.setAttribute('name', 'state');
   option_result = optionsArray.map((value) => {
         return {
             text: String(value),
+            value: String(value),
             selected: false
         };
     });
@@ -147,8 +147,10 @@ function createDropdown(element,optionsArray) {
   select.selectedIndex = -1;
   par_el = element.parentElement;
   element.replaceWith(new_td);
-  new_td.appendChild(div_select_wrap);
-  div_select_wrap.appendChild(select);
+  new_td.appendChild(select);
+    $(document).ready(function() {
+        $('.js-example-basic-single').select2();
+    });
   select.addEventListener('change', function(event) {
     options_arr = event.target.getElementsByTagName('option')
     for (let cur_option of options_arr)
@@ -194,7 +196,7 @@ function FillRow(element){//редактируем поля
         arr_fields = dict_fields[field];
         createDropdown(element,arr_fields);
         return
-    }ъ
+    }
     element.contentEditable = true;
     element.focus();
     enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
@@ -205,4 +207,30 @@ function FillRow(element){//редактируем поля
     */
     element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
     element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
+}
+
+function requestUpdateText (event,element,element_parent,text)
+{
+    children = element_parent.children;
+    index = Array.prototype.indexOf.call(children, element);
+    thead = document.querySelector('thead').firstElementChild;
+    field_name = thead.children[index].innerText;
+    let data = {
+      "field":"list",
+      "table_verbose_name_plural": model,
+      "id": element.parentElement.firstElementChild.innerText,
+      "field_name":field_name,
+      "new_data":text,
+    };
+    sendData(data,element,"POST", "/change/",false)
+    .then(response => {
+            new_id = response.id
+            for (let i = 0; i < columnCount; i++) {
+                let newCell = document.createElement('td');
+                newCell.ondblclick = function() { FillRow(this); };
+                if (i==0) {newCell.textContent=new_id} else newCell.textContent = '-';
+                newRow.appendChild(newCell);
+            }
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+        })
 }

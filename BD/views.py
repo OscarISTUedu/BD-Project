@@ -19,6 +19,7 @@ def patient_list(request):
     patients = Patient.objects.all().order_by('id').values()
     fields = Patient._meta.get_fields()
     fields = fields[1:]
+
     return render(request, 'model_list.html',
                   {'models': patients,'h1':Patient._meta.verbose_name_plural,'fields':fields})
 
@@ -57,7 +58,17 @@ def visit_list(request):
 @permission_required('BD.view_ticket')
 def ticket_list(request):
     tickets = Ticket.objects.all().order_by('id').values()
+    Patient.objects.filter()
     fields = Ticket._meta.get_fields()
+    for ticket in tickets:
+        diagnosis = Diagnosis.objects.filter(id=ticket.get('diagnosis_id')).first().diagnosis
+        visit = Visit.objects.filter(id=ticket.get('visit_id')).first().visit
+        patient = Patient.objects.filter(id=ticket.get('patient_id')).first().surname
+        doctor = Doctor.objects.filter(id=ticket.get('doctor_id')).first().surname
+        ticket['diagnosis_id'] = Diagnosis.objects.filter(id=ticket.get('diagnosis_id')).first().diagnosis
+        ticket['visit_id'] =  Visit.objects.filter(id=ticket.get('visit_id')).first().visit
+        ticket['patient_id'] = Patient.objects.filter(id=ticket.get('patient_id')).first().surname +","+ str(ticket['patient_id'])
+        ticket['doctor_id'] = Doctor.objects.filter(id=ticket.get('doctor_id')).first().surname +","+ str(ticket['doctor_id'])
     return render(request, 'model_list.html',
                   {'models': tickets, 'h1': Ticket._meta.verbose_name_plural, 'fields': fields})
 
@@ -182,3 +193,35 @@ def add_empty_row(request):
             break
     last_obj = cur_model.objects.last().id
     return JsonResponse({"id":last_obj+1},status=200)
+
+def validate_field (request):
+    data = json.loads(request.body)
+    verbose_name_plural = data.pop('table_verbose_name_plural')
+    verbose_name_field = data.pop('field_name')
+    new_data = data.pop('new_data')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == verbose_name_plural:
+            cur_model = model
+            break
+    fields = cur_model._meta.get_fields()
+    for field in fields:
+        if not isinstance(field, ManyToOneRel):
+            if field.verbose_name == verbose_name_field:
+                if isinstance(field, ForeignKey):
+                    is_foreign_key = True
+                cur_field_name = field.name
+                cur_field = field
+                break
+    cur_obj = cur_model.create()
+    try:
+        setattr(cur_obj, cur_field_name, new_data)
+    except Exception as e:
+        print(str(e))
+        cur_obj.delete()
+        return JsonResponse(
+            {"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},
+            status=500)
+    cur_obj.delete()
+    return JsonResponse ({cur_field_name:new_data},status=200)
+
+

@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
-    <link rel="stylesheet" href="{% static 'css/model_list.css'%}?v={{ timestamp }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/model_list.css'%}">
 </head>
 <body>
     <!-- Панель навигации -->
@@ -104,7 +105,9 @@
         </ul>
         <div class="errors"></div>
     </div>
-    <script src="{% static 'js/model_list.js' %}?v={{ timestamp }}"></script>
+    <script src="{% static 'js/model_list.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </body>
 </html>
 <!-- ?v={{ timestamp }} -->
