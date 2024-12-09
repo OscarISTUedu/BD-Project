@@ -150,9 +150,7 @@ function createDropdown(element,optionsArray) {
   par_el = element.parentElement;
   element.replaceWith(new_td);
   new_td.appendChild(select);
-    $(document).ready(function() {
-        $('base').select2();
-    });
+
   /*
   select.addEventListener('change', function(event) {
     options_arr = event.target.getElementsByTagName('option')
