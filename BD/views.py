@@ -1,7 +1,7 @@
-import datetime
 import json
-from idlelib.config_key import translate_key
+from dataclasses import field
 
+from Tools.scripts.make_ctype import values
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -235,6 +235,19 @@ def get_fields_by_name(request):
         if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
-    values = cur_model.objects.values_list(field_name,flat=True).distinct()
-    values = [val for val in values]
+    if field_name == "visit_id":
+        values = Visit.objects.values_list("visit",flat=True)#flat - вывод значений, а не кортежей с полями
+    elif field_name == "diagnosis_id":
+        values = Diagnosis.objects.values_list("diagnosis",flat=True)
+    else:#общий случай
+        values = cur_model.objects.values_list(field_name,flat=True).distinct()
+    if field_name == "doctor_id":
+        values = list(map(lambda x: Doctor.objects.filter(id=x).first().surname +",№"+ str(x),values))
+    if field_name == "patient_id":
+        values = list(map(lambda x: Patient.objects.filter(id=x).first().surname + ",№" + str(x), values))
+    try:
+        values = [int(val) for val in values]
+    except Exception:
+        values = [val for val in values]
+    values.sort()
     return JsonResponse({"values": values}, status=200)

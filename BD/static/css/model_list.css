@@ -146,11 +146,7 @@ th:last-child, td:last-child {
   background-color: red;
   animation: highlight 1s ease-out forwards;
 }
-/*
-select {
-    height: auto; //автоматическая высота, чтобы убрался скролл
-    overflow-y: hidden; //скрыть вертикальный скролл
-}*/
+
 #popup {
     top: 20px;
     right: 20px;
@@ -166,25 +162,19 @@ select {
     display:flex;
     flex-flow:row-reverse wrap;
 }
-/*
-.select-wrapper {
-  position: relative;
-  width: auto;
-  margin: 5% 0;
-  border: 1px solid #6C7231;
-  border-radius: 3px;
-  border-bottom: 1px solid #000
+/* Удаление горизонтального скрола у выпадающего списка */
+.select2-container {
+    width: auto !important; /* Разрешает контейнеру адаптироваться */
 }
-.select-wrapper:hover {
-  box-shadow: 0px 0px 3px gray;
+
+.select2-dropdown {
+    width: auto !important; /* Задает автоматическую ширину для выпадающего списка */
 }
-.select-wrapper select {
-  width: auto;
-  height: 28px;
-  background: transparent;
-  border: 0;
+
+.select2-results {
+    width: auto !important; /* Убирает фиксированную ширину результатов */
+    white-space: nowrap; /* Не позволяет переносить текст */
 }
-*/
 
 /* Адаптивность */
 @media (max-width: 600px) {

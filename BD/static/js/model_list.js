@@ -18,7 +18,7 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("change_"+model_dict[model]))
         {
-            let list_fields = ["category","status","street"];
+            let list_fields = ["category","status","street","neighborhood_id","diagnosis_id","visit_id","doctor_id","patient_id","visit_id"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
             if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
@@ -133,7 +133,7 @@ async function showPopups(text) {await showPopup(text);}
 function createDropdown(element,optionsArray) {
   new_td = document.createElement('td');
   select = document.createElement('select');
-  select.setAttribute('id', 'base');
+  select.setAttribute('class', 'base');
   option_result = optionsArray.map((value) => {
         return {
             text: String(value),
@@ -150,8 +150,12 @@ function createDropdown(element,optionsArray) {
   par_el = element.parentElement;
   element.replaceWith(new_td);
   new_td.appendChild(select);
+  $(document).ready(function() {
+        $('.base').select2({
+            placeholder: "Выберите", // Место для подсказки
+        });
+    });
 
-  /*
   select.addEventListener('change', function(event) {
     options_arr = event.target.getElementsByTagName('option')
     for (let cur_option of options_arr)
@@ -163,7 +167,7 @@ function createDropdown(element,optionsArray) {
             }
     }
 });
-*/
+
 }
 
 function MakeAddingRow(element){
