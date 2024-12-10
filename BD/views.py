@@ -1,5 +1,6 @@
 import json
 from dataclasses import field
+from types import NoneType
 
 from Tools.scripts.make_ctype import values
 from django.contrib.auth import login, logout
@@ -122,7 +123,8 @@ def change_view(request):
                 cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
-    if cur_obj:#если сущ-ет то меняем, если нет то добавляем
+    if cur_obj:#если сущ-ет, то меняем, если нет, то добавляем
+        '''
         if  is_foreign_key:
             childModel_name_plural = getattr(cur_obj, cur_field_name)._meta.verbose_name_plural
             for model in apps.get_models():
@@ -164,6 +166,7 @@ def change_view(request):
             except ValidationError as e:
                 return JsonResponse({"response": e.messages[0]}, status=500)
             return HttpResponse(status=200)
+        '''
         if cur_field=="status":
             cur_pat = cur_obj.patient
             cur_doc = cur_obj.doctor
@@ -176,7 +179,6 @@ def change_view(request):
         try:
             setattr(cur_obj, cur_field_name, new_data)
         except Exception as e:
-            print(str(e))
             return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"}, status=500)
         try:
             cur_obj.full_clean()
@@ -219,7 +221,6 @@ def validate_field (request):
     try:
         setattr(cur_obj, cur_field_name, new_data)
     except Exception as e:
-        print(str(e))
         cur_obj.delete()
         return JsonResponse(
             {"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},
@@ -235,19 +236,62 @@ def get_fields_by_name(request):
         if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
-    if field_name == "visit_id":
-        values = Visit.objects.values_list("visit",flat=True)#flat - вывод значений, а не кортежей с полями
+    RelatedModel = cur_model._meta.get_field(field_name).related_model
+    if field_name == "visit_id":#цели посещения: выводятся - названия, значения - id
+        values = RelatedModel.objects.values_list("visit_id","visit")
+        values = list(values)
+        values = [item for item in values if item[0] is not None]#убрали None
+        values = sorted(values, key=lambda x: x[0])
+        return JsonResponse({"values": values}, status=200)
     elif field_name == "diagnosis_id":
-        values = Diagnosis.objects.values_list("diagnosis",flat=True)
-    else:#общий случай
+        values = RelatedModel.objects.values_list("diagnosis",flat=True)
+    elif field_name == "neighborhood_id":
+        values = RelatedModel.objects.values_list("id",flat=True)
+    else:
         values = cur_model.objects.values_list(field_name,flat=True).distinct()
     if field_name == "doctor_id":
-        values = list(map(lambda x: Doctor.objects.filter(id=x).first().surname +",№"+ str(x),values))
+        values = RelatedModel.objects.values_list("id",flat=True)
+        values = list(map(lambda x: RelatedModel.objects.filter(id=x).first().surname +",№"+ str(x),values))
     if field_name == "patient_id":
-        values = list(map(lambda x: Patient.objects.filter(id=x).first().surname + ",№" + str(x), values))
+        values = RelatedModel.objects.values_list("id", flat=True)
+        values = list(map(lambda x: RelatedModel.objects.filter(id=x).first().surname + ",№" + str(x), values))
     try:
         values = [int(val) for val in values]
     except Exception:
         values = [val for val in values]
     values.sort()
     return JsonResponse({"values": values}, status=200)
+
+def change_by_list(request):
+    data = json.loads(request.body)
+    data_all = data.copy()
+    #{'model_name': 'Пациенты', 'field_name': 'street', 'old_data': 'Ленина', 'new_data': 'Зеленая'}
+    new_data = data.pop('new_data')
+    last_data = data.pop('last_data')
+    if new_data == last_data:
+        return HttpResponse(status=304)
+    model_name = data.pop('model_name')
+    field_name = data.pop('field_name')
+    row_id = data.pop('id')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == model_name:
+            cur_model = model
+            break
+    cur_obj = cur_model.objects.filter(id=row_id).first()
+    #print(field_name)
+    #print(cur_model)
+    relatedModels = cur_model._meta.get_field(field_name).related_model
+    child_instance = relatedModels.objects.filter(id=new_data).first()
+    #print(child_instance)
+    '''
+            try:
+                setattr(cur_obj, cur_field_name, child_instance)
+            except Exception as e:
+                return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},status=500)
+            try:
+                cur_obj.full_clean()
+                cur_obj.save()
+            except ValidationError as e:
+                return JsonResponse({"response": e.messages[0]}, status=500)
+    '''
+    return JsonResponse({},status=200)

@@ -18,7 +18,7 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("change_"+model_dict[model]))
         {
-            let list_fields = ["category","status","street","neighborhood_id","diagnosis_id","visit_id","doctor_id","patient_id","visit_id"];
+            let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id","visit_id"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
             if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
@@ -131,16 +131,18 @@ async function showPopups(text) {await showPopup(text);}
 
 
 function createDropdown(element,optionsArray) {
+  id = element.parentElement.firstElementChild.innerText;
   new_td = document.createElement('td');
   select = document.createElement('select');
   select.setAttribute('class', 'base');
-  option_result = optionsArray.map((value) => {
+  option_result = optionsArray.map(([key,value]) => {
         return {
-            text: String(value),
-            value: String(value),
+            text: value,
+            value: key,
             selected: false
         };
     });
+   console.log(option_result);
   option_result.forEach(optionText => {
     const option = document.createElement('option');
     option.textContent = optionText.text;
@@ -154,20 +156,14 @@ function createDropdown(element,optionsArray) {
         $('.base').select2({
             placeholder: "Выберите", // Место для подсказки
         });
+        $('.base').on('select2:select', function(e) {
+            var selectedText = e.params.data.text; // Текст выбранного элемента
+            var selectedValue = e.params.data.id;
+            console.log('Выбранный элемент:', selectedText, 'со значением:', selectedValue);
+
+            //sendData({"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,"POST","/change_by_list/",false)
+        });
     });
-
-  select.addEventListener('change', function(event) {
-    options_arr = event.target.getElementsByTagName('option')
-    for (let cur_option of options_arr)
-    {
-        if (cur_option.selected)
-            {
-            requestListUpdate(event,new_td,par_el,cur_option.text)
-            break;
-            }
-    }
-});
-
 }
 
 function MakeAddingRow(element){
