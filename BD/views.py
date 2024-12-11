@@ -99,7 +99,6 @@ def main_view(request):
 @login_required
 def change_view(request):
     data = json.loads(request.body)
-    data_all = data.copy()
     request_type = data.pop('field')
     new_data = data.pop('new_data')
     if request_type == "text":
@@ -124,51 +123,7 @@ def change_view(request):
                 cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
-
     if cur_obj:#если сущ-ет, то меняем, если нет, то добавляем
-        '''
-        if  is_foreign_key:
-            childModel_name_plural = getattr(cur_obj, cur_field_name)._meta.verbose_name_plural
-            for model in apps.get_models():
-                if model._meta.verbose_name_plural == childModel_name_plural:
-                    childModels = model
-                    break
-            try:
-                can_update = childModels.objects.filter(id=new_data).exists()
-            except ValueError as e:
-                return JsonResponse({"response": "Не верный формат данных"}, status=500)
-            if not can_update:
-                return JsonResponse({"response": "Данной записи в дочерней таблице не существует"}, status=500)
-            if cur_field_name == "doctor":
-                #меняем доктора у текущего пациента, берём район нового доктора из этого района берём улицу, сравниваем эту улицу и улицу у текущего пациента
-                pat_street = Patient.objects.filter(id=cur_obj.patient.id).first().street
-                pat_surname = Patient.objects.filter(id=cur_obj.patient.id).first().surname
-                doc_street = childModels.objects.filter(id=new_data).first().neighborhood.neighborhood_street
-                if not pat_street==doc_street:#childModels - Доктор
-                    return JsonResponse({"response": f"Данный доктор не сможет обслужить пациента {pat_surname} т.к пациент живёт в другом районе"}, status=500)
-
-            if cur_field_name == "patient":
-                #меняем пациента у текущего доктора, берём улицу нового пациента,берём район текущего доктора, из этго района берём улицу сравниваем эту улицу и улицу у текущего пациента
-                pat_street = childModels.objects.filter(id=new_data).first().street
-                doc_surname = Doctor.objects.filter(id=cur_obj.doctor.id).first().surname
-                doc_street = Neighborhood.objects.filter(id=cur_obj.doctor.id).first().neighborhood_street
-                if not pat_street==doc_street:#childModels - Пациент
-                    return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к доктор не принимает этот район"}, status=500)
-
-            if cur_field_name == "neighborhood":#Изменение района для доктора, означает что все его записи для людей старого района удаляются
-                Ticket.objects.filter(doctor = cur_obj.id).delete()
-            child_instance = childModels.objects.filter(id=new_data).first()
-            try:
-                setattr(cur_obj, cur_field_name, child_instance)
-            except Exception as e:
-                return JsonResponse({"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},status=500)
-            try:
-                cur_obj.full_clean()
-                cur_obj.save()
-            except ValidationError as e:
-                return JsonResponse({"response": e.messages[0]}, status=500)
-            return HttpResponse(status=200)
-        '''
         try:
             setattr(cur_obj, cur_field_name, new_data)
         except Exception as e:
