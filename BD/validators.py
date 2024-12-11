@@ -79,3 +79,47 @@ def validate_visit(value):
     pattern = r'^[А-Яа-яЁё]+( [А-Яа-яЁё]+)*$'
     if not (re.fullmatch(pattern, value)):
         raise ValidationError("Не верный формат")
+
+def validate_status(field_name,cur_obj,new_data):
+    from BD.models import Ticket
+    from django.http import JsonResponse
+    if field_name == "status":
+        cur_pat = cur_obj.patient
+        cur_doc = cur_obj.doctor
+        tickets_for_cur_pat = Ticket.objects.filter(patient=cur_pat,doctor=cur_doc)  # другие записи у данного пациента к данному врачу
+        if tickets_for_cur_pat.exists() and new_data == "Первичный":  # если предыдущие записи не найдены, значит данный приём первичный
+            return JsonResponse({"response": "Статус не может быть первичным,данный пациент уже посещал этого врача"}, status=500)
+        if new_data == "Вторичный":
+            for ticket in tickets_for_cur_pat:  # если найдены предыдущие записи у того же врача, у них есть диагноз значит данный приём вторичный
+                if not ticket.diagnosis:
+                    return JsonResponse({"response": "Статус не может быть вторичный,данный пациент ещё не посещал этого врача"},status=500)
+    else:
+        return None
+
+def validate_patient_id(field_name,childModels,field_id,cur_obj):
+    from django.http import JsonResponse
+    from BD.models import Doctor, Neighborhood
+    if field_name == "patient_id":
+        # меняем пациента у текущего доктора, берём улицу нового пациента, берём район текущего доктора, из этого района берём улицу сравниваем эту улицу и улицу у текущего пациента
+        pat_street = childModels.objects.filter(id=field_id).first().street
+        doc_surname = Doctor.objects.filter(id=cur_obj.doctor.id).first().surname
+        doc_street = Neighborhood.objects.filter(id=cur_obj.doctor.id).first().neighborhood_street
+        if not pat_street == doc_street:  # childModels - Пациент
+            return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к он не принимает этот район"},status=500)
+    else:
+        return None
+
+def validate_doctor_id(field_name,childModels,field_id,cur_obj):
+    from django.http import JsonResponse
+    from BD.models import Patient
+    if field_name == "doctor_id":
+        # меняем доктора у текущего пациента, берём район нового доктора из этого района берём улицу, сравниваем эту улицу и улицу у текущего пациента
+        pat_street = Patient.objects.filter(id=cur_obj.patient.id).first().street
+        pat_surname = Patient.objects.filter(id=cur_obj.patient.id).first().surname
+        doc_street = childModels.objects.filter(id=field_id).first().neighborhood.neighborhood_street
+        if not pat_street == doc_street:  # childModels - Доктор
+            return JsonResponse({"response": f"Данный доктор не сможет обслужить пациента {pat_surname} т.к он живёт в другом районе"},status=500)
+    else:
+        return None
+
+

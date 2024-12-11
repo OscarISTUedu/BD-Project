@@ -18,7 +18,7 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("change_"+model_dict[model]))
         {
-            let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id","visit_id"];
+            let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id"];
             last_data = element.innerText;
             field = element.getAttribute("Name");
             if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
@@ -26,7 +26,7 @@ function makeEditable(element) {//при клике на ячейку она с�
                 element.focus();
                 sendData({"field_name":field,"model_name":model},element,"POST", "/get_fields_by_name/", true)
                 .then(response => {
-                createDropdown(element,response.values);//то создаётся выпадающий список
+                createDropdown(element,response.values,response.type);//то создаётся выпадающий список
                 })
                 .catch(error => {
                 console.error('Ошибка: ', error);
@@ -89,7 +89,7 @@ function sendData(data, element, method, dir, isReturn) {
         let jsonData = JSON.stringify(data);
         xhr.onload = function () {
             let response;
-            if (xhr.status == 200 && isReturn) {
+            if (xhr.status == 200) {
                 response = JSON.parse(xhr.responseText);
                 resolve(response); // Разрешаем промис с данными ответа
             } else {
@@ -130,26 +130,29 @@ function showPopup(text) {
 async function showPopups(text) {await showPopup(text);}
 
 
-function createDropdown(element,optionsArray) {
-  id = element.parentElement.firstElementChild.innerText;
-  new_td = document.createElement('td');
-  select = document.createElement('select');
+function createDropdown(element,optionsArray,type) {
+  let IsTextId = type=="text&id" ? true : false;
+  let id = element.parentElement.firstElementChild.innerText;
+  let new_td = document.createElement('td');
+  let select = document.createElement('select');
   select.setAttribute('class', 'base');
-  option_result = optionsArray.map(([key,value]) => {
-        return {
-            text: value,
-            title: key,
-            selected: false
-        };
-    });
-   console.log(option_result);
-  option_result.forEach(optionText => {
+  if (IsTextId)
+  {optionsArray.forEach(([key, value]) => {
     const option = document.createElement('option');
-    option.textContent = optionText.text;
+    option.value = key; // Устанавливаем value для корректной работы Select2
+    option.textContent = value; // Текст для отображения
     select.appendChild(option);
-  });
+});} else
+{optionsArray.forEach((value) => {
+    const option = document.createElement('option');
+    option.textContent = value; // Текст для отображения
+    select.appendChild(option);
+});
+}
+    console.log(type);
+    console.log(optionsArray);
   select.selectedIndex = -1;
-  par_el = element.parentElement;
+  let par_el = element.parentElement;
   element.replaceWith(new_td);
   new_td.appendChild(select);
   $(document).ready(function() {
@@ -157,11 +160,17 @@ function createDropdown(element,optionsArray) {
             placeholder: "Выберите", // Место для подсказки
         });
         $('.base').on('select2:select', function(e) {
-            var selectedText = e.params.data.text; // Текст выбранного элемента
-            var selectedValue = e.params.data.id;
-            console.log('Выбранный элемент:', selectedText, 'со значением:', selectedValue);
-            console.log('Данные:',e.params.data);
-            //sendData({"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,"POST","/change_by_list/",false)
+            let selectedText = e.params.data.text;
+            if (IsTextId)
+            {
+                let selectedValue = e.params.data.id;
+                sendData({"type":type,"field_id":selectedValue,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,"POST","/change_by_list/",false)
+            } else
+            {
+                sendData({"type":type,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,"POST","/change_by_list/",false)
+
+            }
+
         });
     });
 }
