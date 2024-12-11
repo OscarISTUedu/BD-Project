@@ -221,7 +221,7 @@ def validate_field (request):
     cur_obj.delete()
     return JsonResponse ({cur_field_name:new_data},status=200)
 
-def get_fields_by_name(request):
+def get_fields_by_name(request):#все значения для выпадающего списка
     data = json.loads(request.body)
     field_name = data.pop('field_name')
     model_name = data.pop('model_name')
@@ -257,7 +257,7 @@ def get_fields_by_name(request):
     values.sort()
     return JsonResponse({"values": values,"type":"id"}, status=200)
 
-def change_by_list(request):
+def change_by_list(request):#изменение в бд, валидация
     data = json.loads(request.body)
     new_data = data.pop('new_data')
     last_data = data.pop('last_data')
