@@ -2,7 +2,6 @@ import json
 from dataclasses import field
 from types import NoneType
 
-from Tools.scripts.make_ctype import values
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -123,6 +122,7 @@ def change_view(request):
                 cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
+
     if cur_obj:#если сущ-ет, то меняем, если нет, то добавляем
         '''
         if  is_foreign_key:
@@ -238,7 +238,7 @@ def get_fields_by_name(request):
             break
     RelatedModel = cur_model._meta.get_field(field_name).related_model
     if field_name == "visit_id":#цели посещения: выводятся - названия, значения - id
-        values = RelatedModel.objects.values_list("visit_id","visit")
+        values = RelatedModel.objects.values_list("id","visit")
         values = list(values)
         values = [item for item in values if item[0] is not None]#убрали None
         values = sorted(values, key=lambda x: x[0])

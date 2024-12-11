@@ -138,7 +138,7 @@ function createDropdown(element,optionsArray) {
   option_result = optionsArray.map(([key,value]) => {
         return {
             text: value,
-            value: key,
+            title: key,
             selected: false
         };
     });
@@ -160,7 +160,7 @@ function createDropdown(element,optionsArray) {
             var selectedText = e.params.data.text; // Текст выбранного элемента
             var selectedValue = e.params.data.id;
             console.log('Выбранный элемент:', selectedText, 'со значением:', selectedValue);
-
+            console.log('Данные:',e.params.data);
             //sendData({"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,"POST","/change_by_list/",false)
         });
     });
