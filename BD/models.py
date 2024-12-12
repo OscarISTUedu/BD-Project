@@ -1,4 +1,4 @@
-from django.core.validators import DecimalValidator, MaxLengthValidator
+from django.core.validators import DecimalValidator
 from django.db import models
 
 from BD.validators import validate_house, validate_street, validate_birth, validate_third_name, validate_surname, \
@@ -10,15 +10,15 @@ class Patient(models.Model):
         Man = "Мужчина"
         Woman = "Женщина"
     id = models.IntegerField(primary_key=True,verbose_name="Номер")
-    med_card = models.BigIntegerField(verbose_name="Номер мед.карты",default=0)
-    med_polys = models.BigIntegerField(verbose_name="Номер мед.полиса",default=0)
-    name = models.CharField(max_length=20,verbose_name="Имя",validators=[validate_name],default="Имя")
-    surname = models.CharField(max_length=30,verbose_name="Фамилия",validators=[validate_surname],default="Фамилия")
-    third_name = models.CharField(max_length=30,null=True,blank=True,verbose_name="Отчество",validators=[validate_third_name],default="Отчество")
-    sex = models.CharField(max_length=10,choices=Sex,default=Sex.Man,verbose_name="Пол")
-    date_of_birth = models.DateField(verbose_name="Дата рождения",validators=[validate_birth],default="1910-01-01")
-    street = models.CharField(max_length=100,verbose_name="Улица",validators=[validate_street],default="Улица")
-    house = models.CharField(max_length=10,verbose_name="Дом",validators=[validate_house],default="Дом и номер(если есть)")
+    med_card = models.BigIntegerField(verbose_name="Номер мед.карты")
+    med_polys = models.BigIntegerField(verbose_name="Номер мед.полиса")
+    name = models.CharField(max_length=20,verbose_name="Имя",validators=[validate_name])
+    surname = models.CharField(max_length=30,verbose_name="Фамилия",validators=[validate_surname])
+    third_name = models.CharField(max_length=30,null=True,blank=True,verbose_name="Отчество",validators=[validate_third_name])
+    sex = models.CharField(max_length=10,choices=Sex,verbose_name="Пол")
+    date_of_birth = models.DateField(verbose_name="Дата рождения",validators=[validate_birth])
+    street = models.CharField(max_length=100,verbose_name="Улица",validators=[validate_street])
+    house = models.CharField(max_length=10,verbose_name="Дом",validators=[validate_house])
     class Meta:
         managed = False
         db_table = 'Patient'

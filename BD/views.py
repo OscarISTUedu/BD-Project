@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
-from django.db.models import ManyToOneRel, ForeignKey
+from django.db.models import ManyToOneRel
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
@@ -23,7 +23,7 @@ def patient_list(request):
     fields = fields[1:]
 
     return render(request, 'model_list.html',
-                  {'models': patients,'h1':Patient._meta.verbose_name_plural,'fields':fields})
+                  {'models': patients,'h1':Patient._meta.verbose_name_plural,'fields':fields,"fields_len":len(fields)})
 
 @permission_required('BD.view_doctor')
 def doctor_list(request):
@@ -31,7 +31,7 @@ def doctor_list(request):
     fields = Doctor._meta.get_fields()
     fields = fields[1:]
     return render(request, 'model_list.html',
-                  {'models': doctors, 'h1': Doctor._meta.verbose_name_plural, 'fields': fields})
+                  {'models': doctors, 'h1': Doctor._meta.verbose_name_plural, 'fields': fields,"fields_len":len(fields)})
 
 @permission_required('BD.view_neighborhood')
 def neighborhood_list(request):
@@ -39,7 +39,7 @@ def neighborhood_list(request):
     fields = Neighborhood._meta.get_fields()
     fields = fields[1:]
     return render(request, 'model_list.html',
-                  {'models': neighborhoods, 'h1': Neighborhood._meta.verbose_name_plural, 'fields': fields})
+                  {'models': neighborhoods, 'h1': Neighborhood._meta.verbose_name_plural, 'fields': fields,"fields_len":len(fields)})
 
 @permission_required('BD.view_diagnosis')
 def diagnoses_list(request):
@@ -47,7 +47,7 @@ def diagnoses_list(request):
     fields = Diagnosis._meta.get_fields()
     fields = fields[1:]
     return render(request, 'model_list.html',
-                  {'models': diagnoses, 'h1': Diagnosis._meta.verbose_name_plural, 'fields': fields})
+                  {'models': diagnoses, 'h1': Diagnosis._meta.verbose_name_plural, 'fields': fields,"fields_len":len(fields)})
 
 @permission_required('BD.view_visit')
 def visit_list(request):
@@ -55,7 +55,7 @@ def visit_list(request):
     fields = Visit._meta.get_fields()
     fields = fields[1:]
     return render(request, 'model_list.html',
-                  {'models': visits, 'h1': Visit._meta.verbose_name_plural, 'fields': fields})
+                  {'models': visits, 'h1': Visit._meta.verbose_name_plural, 'fields': fields,"fields_len":len(fields)})
 
 @permission_required('BD.view_ticket')
 def ticket_list(request):
@@ -75,7 +75,7 @@ def ticket_list(request):
         ticket['patient_id'] = patient +","+"№"+str(ticket['patient_id'])
         ticket['doctor_id'] = doctor +","+ "№"+str(ticket['doctor_id'])
     return render(request, 'model_list.html',
-                  {'models': tickets, 'h1': Ticket._meta.verbose_name_plural, 'fields': fields})
+                  {'models': tickets, 'h1': Ticket._meta.verbose_name_plural, 'fields': fields,"fields_len":len(fields)})
 
 def login_view(request):
     if request.method == 'POST':
@@ -96,34 +96,28 @@ def logout_view(request):
 def main_view(request):
     return render(request, 'main.html')
 
-@login_required
+@login_required #Изменение текстовых полей
 def change_view(request):
     data = json.loads(request.body)
-    request_type = data.pop('field')
-    new_data = data.pop('new_data')
-    if request_type == "text":
-        last_data = data.pop('last_data')
-        if new_data==last_data:
-            return HttpResponse(status=304)
-    verbose_name_plural = data.pop('table_verbose_name_plural')
-    verbose_name_field = data.pop('field_name')
-    row_id = data.pop('id')
+    new_data = data.get('new_data')
+    last_data = data.get('last_data')
+    if new_data==last_data:
+        return HttpResponse(status=304)
+    verbose_name_plural = data.get('table_verbose_name_plural')
+    verbose_name_field = data.get('field_name')
+    row_id = data.get('id')
     for model in apps.get_models():
         if model._meta.verbose_name_plural == verbose_name_plural:
             cur_model = model
             break
-    is_foreign_key = False
     fields = cur_model._meta.get_fields()
     for field in fields:
         if not isinstance(field, ManyToOneRel):
             if field.verbose_name == verbose_name_field:
-                if isinstance(field, ForeignKey):
-                    is_foreign_key = True
                 cur_field_name = field.name
-                cur_field = field
                 break
     cur_obj = cur_model.objects.filter(id=row_id).first()
-    if cur_obj:#если сущ-ет, то меняем, если нет, то добавляем
+    if cur_obj:#если сущ-ет, то меняем, если нет, то
         try:
             setattr(cur_obj, cur_field_name, new_data)
         except Exception as e:
@@ -134,9 +128,14 @@ def change_view(request):
         except ValidationError as e:
             return JsonResponse({"response":e.messages[0]},status=500)
     else:
-        return JsonResponse({'error_message': str(cur_model) + " с id="+row_id+" не существует"},status=500)
-    return HttpResponse(status=200)
+        field = cur_model._meta.get_field(cur_field_name)
+        try:
+            field.clean(new_data, None)
+        except Exception as e:
+            return JsonResponse({"response": "Не верный формат"},status=500)
+    return JsonResponse({"key":cur_field_name,"value":new_data},status=200)
 
+@login_required
 def add_empty_row(request):
     data = json.loads(request.body)
     verbose_name_plural = data.pop('table_verbose_name_plural')
@@ -147,35 +146,23 @@ def add_empty_row(request):
     last_obj = cur_model.objects.last().id
     return JsonResponse({"id":last_obj+1},status=200)
 
-def validate_field (request):
+@login_required
+def validate_field (request):#валидация любого поля, данной записи нет в бд, но есть в new_row
     data = json.loads(request.body)
-    verbose_name_plural = data.pop('table_verbose_name_plural')
-    verbose_name_field = data.pop('field_name')
-    new_data = data.pop('new_data')
+    new_data = data.get('new_data')
+    last_data = data.get('last_data')
+    type = data.get('type')
+    if new_data == last_data and ((type == "text&id" and new_data != "-") or (type == "id" and new_data != "-")):
+        return HttpResponse(status=304)
+    model_name = data.get('model_name')
+    new_row = data.get('new_row')
     for model in apps.get_models():
-        if model._meta.verbose_name_plural == verbose_name_plural:
+        if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
-    fields = cur_model._meta.get_fields()
-    for field in fields:
-        if not isinstance(field, ManyToOneRel):
-            if field.verbose_name == verbose_name_field:
-                if isinstance(field, ForeignKey):
-                    is_foreign_key = True
-                cur_field_name = field.name
-                cur_field = field
-                break
-    cur_obj = cur_model.create()
-    try:
-        setattr(cur_obj, cur_field_name, new_data)
-    except Exception as e:
-        cur_obj.delete()
-        return JsonResponse(
-            {"response": f"Значение {new_data} не найдено в дочерней таблице,возмонжо проблема в некоректной форме"},
-            status=500)
-    cur_obj.delete()
-    return JsonResponse ({cur_field_name:new_data},status=200)
+    return validate_empty(data, cur_model, new_row)
 
+@login_required
 def get_fields_by_name(request):#все значения для выпадающего списка
     data = json.loads(request.body)
     field_name = data.pop('field_name')
@@ -212,33 +199,30 @@ def get_fields_by_name(request):#все значения для выпадающ
     values.sort()
     return JsonResponse({"values": values,"type":"id"}, status=200)
 
-def change_by_list(request):#изменение в бд, валидация
+@login_required
+def change_by_list(request):#изменение (не)существующей записи в бд, её валидация
     data = json.loads(request.body)
-    print(data)
     new_data = data.get('new_data')
     last_data = data.get('last_data')
-    if new_data == last_data:
+    type = data.get('type')
+    if new_data == last_data and ((type == "text&id" and new_data!="-") or (type == "id" and new_data!="-")):
         return HttpResponse(status=304)
     model_name = data.get('model_name')
     field_name = data.get('field_name')
-    type = data.get('type')
     row_id = data.get('id')
     for model in apps.get_models():
         if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
-    if row_id > cur_model.objects.last().id:#если строки нет в бд
-        validate_empty(data,cur_model)
-
     cur_obj = cur_model.objects.filter(id=row_id).first()
     if type == "text&id":
         field_id = data.get('field_id')#id в родительской таблице
         field_id = None if new_data=="-" else field_id
         relatedModel = cur_model._meta.get_field(field_name).related_model
-        validated_patient_id = validate_patient_id(field_name,relatedModel,field_id,cur_obj)
+        validated_patient_id = validate_patient_id(field_name,relatedModel,field_id,cur_obj,{})
         if not isinstance(validated_patient_id,NoneType):
             return validated_patient_id
-        validated_doctor_id = validate_doctor_id(field_name,relatedModel,field_id,cur_obj)
+        validated_doctor_id = validate_doctor_id(field_name,relatedModel,field_id,cur_obj,{})
         if not isinstance(validated_doctor_id,NoneType):
             return validated_doctor_id
         try:
@@ -249,7 +233,7 @@ def change_by_list(request):#изменение в бд, валидация
                 status=500)
     else:
         new_data = None if new_data == "-" else new_data
-        validated_status = validate_status(field_name,cur_obj,new_data)#Проверка валидности поля status
+        validated_status = validate_status(field_name,cur_obj,new_data,{})#Проверка валидности поля status
         if not isinstance(validated_status,NoneType):
             return validated_status
         try:
@@ -263,4 +247,22 @@ def change_by_list(request):#изменение в бд, валидация
         cur_obj.save()
     except ValidationError as e:
         return JsonResponse({"response": e.messages[0]}, status=500)
+    return JsonResponse({},status=200)
+
+def row_add(request):
+    data = json.loads(request.body)
+    print(data)
+    model_name = data.pop('model_name')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == model_name:
+            cur_model = model
+            break
+    print(data)
+    try:
+        cur_obj = cur_model.objects.create(**data)
+        cur_obj.full_clean()
+        cur_obj.save()
+    except Exception as e:
+        print(str(e))
+        return JsonResponse({"Ошибка"}, status=500)
     return JsonResponse({},status=200)
