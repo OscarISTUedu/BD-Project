@@ -122,4 +122,53 @@ def validate_doctor_id(field_name,childModels,field_id,cur_obj):
     else:
         return None
 
+def validate_empty(data,cur_model):#проверка поля, его нету в бд
+    from django.http import JsonResponse
+    new_data = data.get('new_data')
+    last_data = data.get('last_data')
+    model_name = data.get('model_name')
+    field_name = data.get('field_name')
+    type = data.get('type')
+    row_id = data.get('id')
+    if type == "text&id":
+        field_id = data.get('field_id')#id в родительской таблице
+        field_id = None if new_data=="-" else field_id
+        relatedModel = cur_model._meta.get_field(field_name).related_model
+        '''
+        validated_patient_id = validate_patient_id(field_name,relatedModel,field_id,cur_obj)
+        if not isinstance(validated_patient_id,NoneType):
+            return validated_patient_id
+        validated_doctor_id = validate_doctor_id(field_name,relatedModel,field_id,cur_obj)
+        if not isinstance(validated_doctor_id,NoneType):
+            return validated_doctor_id
+        '''
+        try:
+            cur_obj = cur_model(**{field_name:field_id})
+        except Exception as e:
+            return JsonResponse(
+                {"response": f"Значение {field_id} не найдено в родительской таблице,возможно проблема в некоректной форме"},
+                status=500)
+    else:
+        new_data = None if new_data == "-" else new_data
+        '''
+        validated_status = validate_status(field_name,cur_obj,new_data)
+        if not isinstance(validated_status,NoneType):
+            return validated_status
+        '''
+        try:
+            cur_obj = cur_model(**{field_name: new_data})
+        except Exception as e:
+            return JsonResponse(
+                {
+                    "response": f"Значение {new_data} не найдено в родительской таблице,возможно проблема в некоректной форме"},
+                status=500)
+    try:
+        cur_obj.full_clean()
+        cur_obj.save()
+    except Exception as e:
+        return JsonResponse({"response": f"Значение {field_id} не найдено в родительской таблице,возможно проблема в некоректной форме"},status=500)
+    cur_obj.delete()
+    return JsonResponse({field_name:field_id},status=200) if type == "text&id" else JsonResponse({field_name:new_data},status=200)
+
+
 

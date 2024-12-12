@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.apps import apps
 
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
-from .validators import validate_status, validate_patient_id, validate_doctor_id
+from .validators import validate_status, validate_patient_id, validate_doctor_id, validate_empty
 
 
 @permission_required('BD.view_patient')
@@ -214,21 +214,25 @@ def get_fields_by_name(request):#все значения для выпадающ
 
 def change_by_list(request):#изменение в бд, валидация
     data = json.loads(request.body)
-    new_data = data.pop('new_data')
-    last_data = data.pop('last_data')
+    print(data)
+    new_data = data.get('new_data')
+    last_data = data.get('last_data')
     if new_data == last_data:
         return HttpResponse(status=304)
-    model_name = data.pop('model_name')
-    field_name = data.pop('field_name')
-    type = data.pop('type')
-    row_id = data.pop('id')
+    model_name = data.get('model_name')
+    field_name = data.get('field_name')
+    type = data.get('type')
+    row_id = data.get('id')
     for model in apps.get_models():
         if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
+    if row_id > cur_model.objects.last().id:#если строки нет в бд
+        validate_empty(data,cur_model)
+
     cur_obj = cur_model.objects.filter(id=row_id).first()
     if type == "text&id":
-        field_id = data.pop('field_id')#id в родительской таблице
+        field_id = data.get('field_id')#id в родительской таблице
         field_id = None if new_data=="-" else field_id
         relatedModel = cur_model._meta.get_field(field_name).related_model
         validated_patient_id = validate_patient_id(field_name,relatedModel,field_id,cur_obj)
