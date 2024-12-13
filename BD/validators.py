@@ -104,7 +104,6 @@ def validate_status(field_name,cur_obj,new_data,new_row):
                 tickets_for_cur_pat = tickets_for_cur_pat.filter(date_n_time__gt=date_n_time)  # записи которые были ранее
                 tickets_for_cur_pat = tickets_for_cur_pat.filter(diagnosis__isnull=False)  # записи в которых есть диагноз (значит был прошлый приём)
                 if tickets_for_cur_pat.exists() and new_data == "Первичный":  # если предыдущие записи не найдены, значит данный приём первичный
-                    print(tickets_for_cur_pat)
                     return JsonResponse({"response": "Статус не может быть первичным,данный пациент уже посещал этого врача"}, status=500)
                 if not tickets_for_cur_pat.exists() and new_data == "Вторичный":
                     return JsonResponse({"response": "Статус не может быть вторичный,данный пациент ещё не посещал этого врача"},status=500)
@@ -121,7 +120,6 @@ def validate_patient_id(field_name,childModels,field_id,cur_obj,new_row):
             doc_surname = Doctor.objects.filter(id=cur_obj.doctor.id).first().surname
             doc_street = Neighborhood.objects.filter(id=cur_obj.doctor.neighborhood.id).first().neighborhood_street
             if not pat_street == doc_street:  # childModels - Пациент
-                print(pat_street,doc_street)
                 return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к он не принимает этот район"}, status=500)
         else:
             doctor_id = new_row.get('doctor_id')
@@ -131,7 +129,6 @@ def validate_patient_id(field_name,childModels,field_id,cur_obj,new_row):
                 pat_street = childModels.objects.filter(id=field_id).first().street
                 doc_street = Neighborhood.objects.filter(id=neighborhood_id).first().neighborhood_street
                 if not pat_street == doc_street:
-                    print(pat_street,doc_street)
                     return JsonResponse({"response": f"Данный пациент не сможет ходить на приём к доктору {doc_surname} т.к он не принимает этот район"},status=500)
     else:
         return None

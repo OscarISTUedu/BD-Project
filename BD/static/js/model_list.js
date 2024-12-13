@@ -306,7 +306,6 @@ function MakeAddingRow(element){//При клике на +, добавление
                     for (let i = 0; i < columnCount; i++)
                         {
                             let newCell = document.createElement('td');
-                            console.log(headFields[i].textContent);
                             if (headFields[i].textContent != "")//чтобы нельзя было редактировать крестик для удаления
                             {newCell.ondblclick = function() { FillRow(this); };}
                             if (i==0) {newCell.textContent=new_id;new_row["id"]=new_id;} else
