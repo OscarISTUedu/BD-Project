@@ -64,7 +64,7 @@ class Doctor(models.Model):
     speciality = models.CharField(max_length=50,verbose_name="Специальность",validators=[validate_speciality])
     category = models.CharField(max_length=10,choices=Category,blank=True,null=True,verbose_name="Категория")
     salary = models.DecimalField(max_digits=8,decimal_places=2,verbose_name="Зарплата",validators=[DecimalValidator(max_digits=8,decimal_places=2)])
-    neighborhood = models.ForeignKey(Neighborhood,on_delete=models.PROTECT,verbose_name="Номер района")
+    neighborhood = models.ForeignKey(Neighborhood,on_delete=models.PROTECT,verbose_name="Номер района",related_name='doctor')
     class Meta:
         managed = False
         db_table = 'Doctor'

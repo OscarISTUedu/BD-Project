@@ -33,6 +33,17 @@
             <li><a href="/visits">Цели визита</a></li>
             <li><a href="/tickets">Талоны посещения</a></li>
             {% endif %}
+            <hr>
+            {% if "Пациенты" in user.groups.all|join:", "  %}
+            <li><a href="/doc_neigh_doc">Список участков и участковых врачей</a></li>
+            {% endif %}
+            {% if "Регистратура" in user.groups.all|join:", "  %}
+            <li></li>
+            {% endif %}
+            {% if "Администрация" in user.groups.all|join:", "  %}
+            <li></li>
+            {% endif %}
+
         </ul>
     </div>
 

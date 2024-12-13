@@ -2,15 +2,18 @@ import json
 from dataclasses import field
 from types import NoneType
 
+import openpyxl
+from Tools.scripts.generate_opcode_h import header
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
-from django.db.models import ManyToOneRel
+from django.db.models import ManyToOneRel, OuterRef, Subquery
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 from django.apps import apps
+from openpyxl.styles import Alignment
 
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
 from .validators import validate_status, validate_patient_id, validate_doctor_id, validate_empty
@@ -279,3 +282,32 @@ def row_delete(request):
     except Exception as e:
         return JsonResponse({"Ошибка удаления элемента"},status=500)
     return JsonResponse({},status=200)
+
+@login_required
+def doc_neigh_doc(request):#Список участков и участковых врачей
+    wb = openpyxl.Workbook()
+    sheet  = wb.active
+    sheet.title = "Список участков и участковых врачей"
+    headers = ["Номер участка", "Имя доктора", "Фамилия доктора","Специальность доктора"]
+    sheet.append(headers)
+    for col_num, header in enumerate(headers, start=1):#Выравнивание
+        cell = sheet.cell(row=1, column=col_num)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    neighborhoods = Neighborhood.objects.prefetch_related('doctor').order_by('id')
+    for neighborhood in neighborhoods:
+        for doctor in neighborhood.doctor.all():
+            sheet.append([neighborhood.id, doctor.name, doctor.surname, doctor.speciality])
+    for column in sheet.columns:#увеличение ширины столбцов
+        max_length = 0
+        column_letter = column[0].column_letter  # Получаем букву столбца
+        for cell in column:
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        sheet.column_dimensions[column_letter].width = max_length + 2  # Добавляем небольшой отступ
+    # Создание ответа с Excel-файлом
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="doc_neigh_doc.xlsx"'
+    # Сохранение книги в ответ
+    wb.save(response)
+    return response

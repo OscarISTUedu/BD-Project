@@ -19,4 +19,5 @@ urlpatterns = [
     path('validate_field/', views.validate_field, name='validate_field'),
     path('row_add/', views.row_add, name='row_add'),
     path('row_delete/', views.row_delete, name='row_delete'),
+    path('doc_neigh_doc/',views.doc_neigh_doc, name='doc_neigh_doc')#Вых.док - Вывод списка участков и участковых врачей
 ]
