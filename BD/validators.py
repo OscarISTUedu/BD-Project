@@ -84,7 +84,7 @@ def validate_status(field_name,cur_obj,new_data,new_row):
     from BD.models import Ticket
     from django.http import JsonResponse
     if field_name == "status":
-        if all([new_row.get('diagnosis_id'),new_row.get('patient_id'),new_row.get('doctor_id'),new_row.get('date_n_time')]):
+        if cur_obj is not None:
             cur_pat = cur_obj.patient
             cur_doc = cur_obj.doctor
             tickets_for_cur_pat = Ticket.objects.filter(patient=cur_pat,doctor=cur_doc)  # другие записи у данного пациента к данному врачу
@@ -94,6 +94,20 @@ def validate_status(field_name,cur_obj,new_data,new_row):
                 return JsonResponse({"response": "Статус не может быть первичным,данный пациент уже посещал этого врача"}, status=500)
             if not tickets_for_cur_pat.exists() and new_data == "Вторичный":
                 return JsonResponse({"response": "Статус не может быть вторичный,данный пациент ещё не посещал этого врача"},status=500)
+        else:
+            diagnosis_id = new_row.get('diagnosis_id')
+            patient_id = new_row.get('patient_id')
+            doctor_id = new_row.get('doctor_id')
+            date_n_time = new_row.get('date_n_time')
+            if all([diagnosis_id,patient_id,doctor_id,date_n_time]):
+                tickets_for_cur_pat = Ticket.objects.filter(patient=patient_id,doctor=doctor_id)  # другие записи у данного пациента к данному врачу
+                tickets_for_cur_pat = tickets_for_cur_pat.filter(date_n_time__gt=date_n_time)  # записи которые были ранее
+                tickets_for_cur_pat = tickets_for_cur_pat.filter(diagnosis__isnull=False)  # записи в которых есть диагноз (значит был прошлый приём)
+                if tickets_for_cur_pat.exists() and new_data == "Первичный":  # если предыдущие записи не найдены, значит данный приём первичный
+                    print(tickets_for_cur_pat)
+                    return JsonResponse({"response": "Статус не может быть первичным,данный пациент уже посещал этого врача"}, status=500)
+                if not tickets_for_cur_pat.exists() and new_data == "Вторичный":
+                    return JsonResponse({"response": "Статус не может быть вторичный,данный пациент ещё не посещал этого врача"},status=500)
     else:
         return None
 

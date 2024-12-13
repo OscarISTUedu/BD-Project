@@ -249,20 +249,33 @@ def change_by_list(request):#изменение (не)существующей �
         return JsonResponse({"response": e.messages[0]}, status=500)
     return JsonResponse({},status=200)
 
+@login_required
 def row_add(request):
     data = json.loads(request.body)
-    print(data)
     model_name = data.pop('model_name')
     for model in apps.get_models():
         if model._meta.verbose_name_plural == model_name:
             cur_model = model
             break
-    print(data)
     try:
         cur_obj = cur_model.objects.create(**data)
         cur_obj.full_clean()
         cur_obj.save()
     except Exception as e:
-        print(str(e))
         return JsonResponse({"Ошибка"}, status=500)
+    return JsonResponse({},status=200)
+
+@login_required
+def row_delete(request):
+    data = json.loads(request.body)
+    row_id = data.get('id')
+    model_name = data.get('model_name')
+    for model in apps.get_models():
+        if model._meta.verbose_name_plural == model_name:
+            cur_model = model
+            break
+    try:
+        cur_model.objects.filter(id=row_id).first().delete()
+    except Exception as e:
+        return JsonResponse({"Ошибка удаления элемента"},status=500)
     return JsonResponse({},status=200)

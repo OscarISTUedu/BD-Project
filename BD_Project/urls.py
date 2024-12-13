@@ -18,4 +18,5 @@ urlpatterns = [
     path('change_by_list/', views.change_by_list, name='change_by_list'),
     path('validate_field/', views.validate_field, name='validate_field'),
     path('row_add/', views.row_add, name='row_add'),
+    path('row_delete/', views.row_delete, name='row_delete'),
 ]

@@ -176,6 +176,70 @@ th:last-child, td:last-child {
     white-space: nowrap; /* Не позволяет переносить текст */
 }
 
+.close-btn { /* Крестик для удаления */
+            bottom: 50%;
+            left: 10%;
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: red;
+            cursor: pointer;
+        }
+
+/* Стили модального фона */
+.modal_wind {
+    display: none; /* По умолчанию скрыто */
+    position: fixed;
+    z-index: 1000; /* Поверх других элементов */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+}
+
+/* Стили модального окна */
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили кнопок */
+.btn_modal {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#confirmYes {
+    background-color: #28a745;
+    color: white;
+}
+
+#confirmNo {
+    background-color: #dc3545;
+    color: white;
+}
+
+#confirmYes:hover {
+    background-color: #218838;
+}
+
+#confirmNo:hover {
+    background-color: #c82333;
+}
+
 /* Адаптивность */
 @media (max-width: 600px) {
     th, td {
@@ -191,12 +255,3 @@ th:last-child, td:last-child {
     }
 }
 
-.close-btn { /* Крестик для удаления */
-            bottom: 5px;
-            left: 1vw;
-            background: none;
-            border: none;
-            font-size: 30px;
-            color: red;
-            cursor: pointer;
-        }

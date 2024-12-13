@@ -1,22 +1,93 @@
-let cells = document.querySelectorAll('tr');
-cells.forEach(cell => {
-    let closeButton = document.createElement('button');
-    closeButton.classList.add('close-btn');
-    closeButton.innerHTML = '×';
-    cell.appendChild(closeButton);
-});
+{//Проверка прав для удаления
+    if (user_group != "Пациенты")
+    {
+        let user_perm_arr_BD = user_perm.split(", ");
+        let user_perm_arr = user_perm_arr_BD.map(item => item.split('.')[1]);
+        model_dict = {
+            "Участки":"neighborhood",
+            "Пациенты":"patient",
+            "Цели визита":"visit",
+            "Врачи":"doctor",
+            "Талоны":"ticket",
+            "Диагнозы":"diagnosis"}
+        if (user_perm.includes("delete_"+model_dict[model]))  {EnableDelete();}
+    }
+}
 
+function EnableDelete()
+{
+    let cells = document.querySelectorAll('tr');
+    cells.forEach(cell => {
+        if (cell.parentElement.tagName != 'THEAD')
+        {
+            let emptyCell = document.createElement('td');
+            let closeButton = document.createElement('button');
+            closeButton.classList.add('close-btn');
+            closeButton.innerHTML = '×';
+            cell.appendChild(emptyCell);
+            emptyCell.appendChild(closeButton);
+        }
+        else{
+        let emptyCell = document.createElement('td');
+        cell.appendChild(emptyCell);
+        }
+    });
+    const buttons = document.querySelectorAll('.close-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            showConfirm(`Вы хотите удалить элемент с номером ${button.parentElement.parentElement.children[0].innerHTML} ?`, function (result) {
+            if (result) {
+                sendData({"id":button.parentElement.parentElement.children[0].innerHTML,"model_name":model},button,button,"POST","/row_delete/");
+                setTimeout(() => { location.reload(); }, 500);
+            }
+            });
+        });
+    });
+}
+
+function showConfirm(message, callback) {
+    let html = document.querySelector('html');
+    let modal = document.createElement('div');
+    modal.setAttribute('id','customConfirm');
+    modal.setAttribute('class','modal_wind');
+    let modal_content = document.createElement('div');
+    modal_content.setAttribute('class','modal-content');
+    let yesButton = document.createElement('button');
+    yesButton.setAttribute('id','confirmYes');
+    yesButton.setAttribute('class','btn_modal');
+    yesButton.innerHTML = '✔';
+    let noButton = document.createElement('button');
+    noButton.innerHTML = '✖';
+    noButton.setAttribute('id','confirmNo');
+    noButton.setAttribute('class','btn_modal');
+    let paragraph = document.createElement('p');
+    paragraph.textContent = message;
+    html.appendChild(modal);
+    modal.appendChild(modal_content);
+    modal_content.appendChild(yesButton);
+    modal_content.appendChild(noButton);
+    modal_content.appendChild(paragraph);
+    modal.style.display = 'block';
+    yesButton.onclick = function () {
+        modal.style.display = 'none'; // Закрыть окно
+        callback(true); // Возвращаем "Да"
+    };
+    noButton.onclick = function () {
+        modal.style.display = 'none'; // Закрыть окно
+        callback(false); // Возвращаем "Нет"
+    };
+}
 
 function getCsrfToken() {
   let match = document.cookie.split('csrftoken=')[1];
   if (match) return match;
   return null;
 }
-function makeEditable(element) {//при клике на ячейку она становится редактируемой
+function makeEditable(element) {//при клике на ячейку она становится редактируемой/появл-ся список значений
     if (user_group != "Пациенты")
     {
-        const user_perm_arr_BD = user_perm.split(", ");
-        const user_perm_arr = user_perm_arr_BD.map(item => item.split('.')[1]);
+        let user_perm_arr_BD = user_perm.split(", ");
+        let user_perm_arr = user_perm_arr_BD.map(item => item.split('.')[1]);
         model_dict = {
             "Участки":"neighborhood",
             "Пациенты":"patient",
@@ -73,12 +144,12 @@ function requestTextUpdate (event,element)
     .then(response =>
                     {
                         new_row[response.key]=response.value;
-                        console.log(Object.keys(new_row).length);
                         if (fields == Object.keys(new_row).length)
                         {
-                        sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                            sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                            new_row = {}
+                            location.reload();
                         }
-                        new_row = {}
                     }
                     )
 
@@ -188,6 +259,12 @@ function createDropdown(element,optionsArray,type,isEmpty,TextIdFunc,IdFunc) {//
                     .then(response =>
                     {
                         new_row[response.key]=response.value;
+                           if (fields == Object.keys(new_row).length)
+                        {
+                            sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                            new_row = {}
+                            location.reload();
+                        }
                     }
                     )
                     .catch(error => {
@@ -199,6 +276,12 @@ function createDropdown(element,optionsArray,type,isEmpty,TextIdFunc,IdFunc) {//
                     .then(response =>
                     {
                         new_row[response.key]=response.value;
+                            if (fields == Object.keys(new_row).length)
+                        {
+                            sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                            new_row = {}
+                            location.reload();
+                        }
                     }
                     )
                     .catch(error => {
@@ -215,6 +298,7 @@ function MakeAddingRow(element){//При клике на +, добавление
         let tableBody = document.querySelector('table tbody');
         let newRow = document.createElement('tr');
         let columnCount = tableBody.rows[0] ? tableBody.rows[0].cells.length : 0;
+        let headFields = document.querySelector('thead').children[0].children;
         sendData({"table_verbose_name_plural":model},element,element,"POST", "/addEmpty/")//Получение нового id
          .then(response =>
                 {
@@ -222,10 +306,12 @@ function MakeAddingRow(element){//При клике на +, добавление
                     for (let i = 0; i < columnCount; i++)
                         {
                             let newCell = document.createElement('td');
-                            newCell.ondblclick = function() { FillRow(this); };
+                            console.log(headFields[i].textContent);
+                            if (headFields[i].textContent != "")//чтобы нельзя было редактировать крестик для удаления
+                            {newCell.ondblclick = function() { FillRow(this); };}
                             if (i==0) {newCell.textContent=new_id;new_row["id"]=new_id;} else
                             {
-                                newCell.textContent = '-';
+                                newCell.textContent = headFields[i].textContent != "" ? '-' : '';
                                 let tbody = tableBody.firstElementChild;
                                 newCell.setAttribute("name", tbody.children[i].getAttribute("Name"));
                             };

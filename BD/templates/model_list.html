@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
     <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/model_list.css'%}">
+    <link rel="stylesheet" href="{% static 'css/model_list.css' %}?v=1001">
     <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css'%}">
 </head>
 <body>
@@ -73,7 +73,7 @@
             const user_group = "{{ user.groups.all|join:", "}}";
             const model = "{{ h1 }}";
             const user_perm = "{{ user.get_all_permissions|join:", "}}";
-            const new_row = {};
+            new_row = {};
             const fields = {{ fields_len }};
 
         </script>
