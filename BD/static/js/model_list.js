@@ -70,6 +70,7 @@ function requestTextUpdate (event,element)
                         {
                         sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
                         }
+                        new_row = {}
                     }
                     )
 
@@ -232,7 +233,7 @@ function MakeAddingRow(element){//При клике на +, добавление
 }
 
 function FillRow(element){//редактируем поля которых нет в бд
-    let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id"];
+    let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id","sex"];
     last_data = element.innerText;
     field = element.getAttribute("Name");
     if (list_fields.includes(field))//Если ячейка имеет тип данных - перечисление
