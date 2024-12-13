@@ -190,3 +190,13 @@ th:last-child, td:last-child {
         width: calc(100% - 200px);
     }
 }
+
+.close-btn { /* Крестик для удаления */
+            bottom: 5px;
+            left: 1vw;
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: red;
+            cursor: pointer;
+        }

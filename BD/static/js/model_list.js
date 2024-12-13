@@ -1,3 +1,11 @@
+let cells = document.querySelectorAll('tr');
+cells.forEach(cell => {
+    let closeButton = document.createElement('button');
+    closeButton.classList.add('close-btn');
+    closeButton.innerHTML = '×';
+    cell.appendChild(closeButton);
+});
+
 
 function getCsrfToken() {
   let match = document.cookie.split('csrftoken=')[1];

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
-    <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}?v={{ timestamp }}"></script>
-    <link rel="stylesheet" href="{% static 'css/model_list.css'%}?v={{ timestamp }}">
+    <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/model_list.css'%}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css'%}">
 </head>
 <body>
@@ -52,6 +52,7 @@
             {% load i18n %}
             {% language "en" %}
                     <tr>
+
                         {% for key,value in model.items %}
                         {% if key == "date_of_birth" %}
                         <td ondblclick="makeEditable(this)" name="{{key}}">{{value|date:"Y-m-d"}}</td>
