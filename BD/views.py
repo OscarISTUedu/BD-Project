@@ -1,9 +1,7 @@
 import json
-from dataclasses import field
 from types import NoneType
 
 import openpyxl
-from Tools.scripts.generate_opcode_h import header
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -15,6 +13,7 @@ from django.shortcuts import render, redirect
 from django.apps import apps
 from openpyxl.styles import Alignment
 
+from .authorisation import group_required
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
 from .validators import validate_status, validate_patient_id, validate_doctor_id, validate_empty
 
@@ -283,7 +282,7 @@ def row_delete(request):
         return JsonResponse({"Ошибка удаления элемента"},status=500)
     return JsonResponse({},status=200)
 
-@login_required
+@group_required(['Пациенты','Администрация'])
 def doc_neigh_doc(request):#Список участков и участковых врачей
     wb = openpyxl.Workbook()
     sheet  = wb.active

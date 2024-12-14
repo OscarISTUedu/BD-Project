@@ -1,7 +1,15 @@
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from BD.models import Doctor, Patient, Ticket, Diagnosis, Neighborhood, Visit
+
+def group_required(group_name):#Если пользователь есть хоть в 1 группе - True
+    def in_group(user):
+        for group in group_name:
+            if user.groups.filter(name=group).exists() or user.is_superuser:
+                return True
+    return user_passes_test(in_group)
 
 DoctorGroup,flag = Group.objects.get_or_create(name='Врачи')
 PatientGroup,flag = Group.objects.get_or_create(name='Пациенты')
@@ -157,12 +165,12 @@ doctor_permission = Permission.objects.filter(codename__in=['view_doctor', 'view
 patient_permission = Permission.objects.filter(codename__in=['view_doctor', 'view_neighborhood'])
 reception_permission = Permission.objects.filter(codename__in=['view_patient', 'view_neighborhood','add_neighborhood','delete_neighborhood','change_neighborhood','view_ticket','add_ticket','delete_ticket','change_ticket'])
 
+'''
 DoctorGroup.permissions.set(doctor_permission)
 PatientGroup.permissions.set(patient_permission)
 AdminGroup.permissions.set(admin_permission)
 ReceptionGroup.permissions.set(reception_permission)
 
-DoctorGroup.refresh_from_db()
 first = User.objects.filter(username='doctor_A')[0]
 first.groups.add(DoctorGroup)
 
@@ -174,3 +182,4 @@ user_rec.groups.add(ReceptionGroup)
 
 user_adm = User.objects.create_user(username='admin_A', password='mypassword')
 user_adm.groups.add(AdminGroup)
+'''
