@@ -154,7 +154,7 @@ def add_empty_row(request):
     return JsonResponse({"id":last_obj+1},status=200)
 
 @login_required
-def validate_field (request):#валидация любого поля, данной записи нет в бд, но есть в new_row
+def validate_field (request):#валидация внешних ключей + статуса, данной записи нет в бд, но есть в new_row
     data = json.loads(request.body)
     new_data = data.get('new_data')
     last_data = data.get('last_data')
@@ -348,6 +348,17 @@ def ticket_print(request):
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
         sheet.column_dimensions[column_letter].width = max_length + 2
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="ticket_print.xlsx"'
+    wb.save(response)
+    return response
+
+@group_required(['Администрация'])
+def patient_diagnosis(request):
+    wb = openpyxl.Workbook()
+    sheet = wb.active
+    sheet.title = "Пациенты"
+    #
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="ticket_print.xlsx"'
     wb.save(response)

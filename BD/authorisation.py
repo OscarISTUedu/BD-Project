@@ -41,6 +41,7 @@ ReceptionGroup,flag = Group.objects.get_or_create(name='Регистратура
 Добавление - Врачи,Талон,Участки,Пациенты,Диагнозы,Цели
 Вых.док - Вывод списка пациентов с определённым диагнозом
 Вых.док - Вывод списка участков и участковых врачей
+Вых.док - Вывод списка пациентов побывавших на приеме у определенного врача за определенный период
 '''
 doctor_content_type = ContentType.objects.get_for_model(Doctor)
 patient_content_type = ContentType.objects.get_for_model(Patient)

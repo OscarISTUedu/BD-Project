@@ -160,12 +160,9 @@ def validate_empty(data,cur_model,new_row):#проверка поля, его н
     from django.http import JsonResponse
     from types import NoneType
     new_data = data.get('new_data')
-    #last_data = data.get('last_data')
-    #model_name = data.get('model_name')
     field_name = data.get('field_name')
     type = data.get('type')
     new_row = data.get('new_row')
-    #row_id = data.get('id')
     field = cur_model._meta.get_field(field_name)
     if type == "text&id":
         field_id = data.get('field_id')#id в родительской таблице

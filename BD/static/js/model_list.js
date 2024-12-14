@@ -1,5 +1,5 @@
 {
-let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');
+let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');//Подсказка при наведении на номер участка у доктора
 sendData({},null,null,"POST","/get_str_neigh_dict/")
 .then(response => {
     let streetDict = response;
@@ -22,6 +22,77 @@ sendData({},null,null,"POST","/get_str_neigh_dict/")
             "Диагнозы":"diagnosis"}
         if (user_perm.includes("delete_"+model_dict[model]))  {EnableDelete();}
     }
+}
+
+
+function MakePatientDiagnosis(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)
+{
+    let selectedText = e.params.data.text;
+        if (IsTextId)
+        {
+            let selectedValue = e.params.data.id;
+        } else
+        {
+        }
+}
+
+{
+sendData({"field_name":"diagnosis","model_name":"Диагнозы"},null,null,"POST", "/get_fields_by_name/")
+    .then(response => {
+        let patientLink = document.querySelector('[name="patient_list"]');
+        patientLink.addEventListener('click', function() {
+        createDropdown(patientLink,response.values,response.type,null,null,MakePatientDiagnosis,'div')
+        })
+});
+}
+
+
+function ListForEdit(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)//[]функция для поведения - что будет если выбрать элемент в списке
+{
+    let selectedText = e.params.data.text;
+        if (IsTextId)
+        {
+            let selectedValue = e.params.data.id;
+            TextIdFunc(type,selectedValue,id,element,selectedText,new_td)// Запрос валидацию внешних ключей,статуса/изменения в бд
+            .then(response =>
+            {
+                if (response.key !== undefined)
+                {
+                    new_row[response.key]=response.value;
+                       if (fields == Object.keys(new_row).length)
+                    {
+                        sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                        new_row = {}
+                        location.reload();
+                    }
+                }
+
+            }
+            )
+            .catch(error => {
+            console.error("Ошибка", error);
+            });
+        } else
+        {
+            IdFunc(type,id,element,selectedText,new_td)// Запрос валидацию внешних ключей,статуса/изменения в бд
+            .then(response =>
+            {
+             if (response.key !== undefined)
+                {
+                    new_row[response.key]=response.value;
+                        if (fields == Object.keys(new_row).length)
+                    {
+                        sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
+                        new_row = {}
+                        location.reload();
+                    }
+                }
+            }
+            )
+            .catch(error => {
+            console.error("Ошибка", error);
+            });
+        }
 }
 
 function EnableDelete()
@@ -115,10 +186,10 @@ function makeEditable(element) {//при клике на ячейку она с�
                 element.focus();
                 sendData({"field_name":field,"model_name":model},element,element,"POST", "/get_fields_by_name/")
                 .then(response => {
-                createDropdown(element,response.values,response.type,false,
+                createDropdown(element,response.values,response.type,
                 (type,selectedValue,id,element,selectedText,new_element)=>{return sendData({"type":type,"field_id":selectedValue,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,new_element,"POST","/change_by_list/")},
-                (type,id,element,selectedText,new_element)=>{return sendData({"type":type,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,new_element,"POST","/change_by_list/")});//то создаётся выпадающий список
-                })
+                (type,id,element,selectedText,new_element)=>{return sendData({"type":type,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,new_element,"POST","/change_by_list/")},//то создаётся выпадающий список
+                ListForEdit,'td')})
                 .catch(error => {
                 console.error('Ошибка: ', error);
                 });
@@ -232,10 +303,11 @@ function showPopup(text) {//черное уведомление справа
 async function showPopups(text) {await showPopup(text);}
 
 
-function createDropdown(element,optionsArray,type,isEmpty,TextIdFunc,IdFunc) {//выпадающие списки
+function createDropdown(element,optionsArray,type,TextIdFunc,IdFunc,BehaviourFunc,htmlTag)
+{//выпадающие списки
   let IsTextId = type=="text&id" ? true : false;
   let id = element.parentElement.firstElementChild.innerText;
-  let new_td = document.createElement('td');
+  let new_td = document.createElement(htmlTag);
   let select = document.createElement('select');
   select.setAttribute('class', 'base');
   if (IsTextId)
@@ -256,49 +328,12 @@ function createDropdown(element,optionsArray,type,isEmpty,TextIdFunc,IdFunc) {//
   new_td.setAttribute("name", element.getAttribute("Name"));
   element.replaceWith(new_td);
   new_td.appendChild(select);
+
   $(document).ready(function() {
         $('.base').select2({
             placeholder: "Выберите", // Место для подсказки
         });
-        $('.base').on('select2:select', function(e) {
-            let selectedText = e.params.data.text;
-                if (IsTextId)
-                {
-                    let selectedValue = e.params.data.id;
-                    TextIdFunc(type,selectedValue,id,element,selectedText,new_td)// Запрос валидацию поля
-                    .then(response =>
-                    {
-                        new_row[response.key]=response.value;
-                           if (fields == Object.keys(new_row).length)
-                        {
-                            sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
-                            new_row = {}
-                            location.reload();
-                        }
-                    }
-                    )
-                    .catch(error => {
-                    console.error("Ошибка", error);
-                    });
-                } else
-                {
-                    IdFunc(type,id,element,selectedText,new_td)// Запрос валидацию поля
-                    .then(response =>
-                    {
-                        new_row[response.key]=response.value;
-                            if (fields == Object.keys(new_row).length)
-                        {
-                            sendData({...new_row,...{"model_name":model}},element,element,"POST","/row_add/");
-                            new_row = {}
-                            location.reload();
-                        }
-                    }
-                    )
-                    .catch(error => {
-                    console.error("Ошибка", error);
-                    });
-                }
-        });
+        $('.base').on('select2:select', (e)=>{BehaviourFunc(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)});
     });
 }
 
@@ -346,11 +381,10 @@ function FillRow(element){//редактируем поля которых не�
         element.focus();
         sendData({"field_name":field,"model_name":model},element,element,"POST", "/get_fields_by_name/")
         .then(response => {
-        createDropdown(element,response.values,response.type,true,
+        createDropdown(element,response.values,response.type,
         (type,selectedValue,id,element,selectedText,new_element)=>{ return sendData({"new_row":new_row,"type":type,"field_id":selectedValue,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,new_element,"POST","/validate_field/")},
         (type,id,element,selectedText,new_element)=>{ return sendData({"new_row":new_row,"type":type,"id":id,"model_name":model,"field_name":element.getAttribute('name'),"last_data":element.innerText,"new_data":selectedText},element,new_element,"POST","/validate_field/")},
-        );//то создаётся выпадающий список
-        })
+        ListForEdit,'td')})
         .catch(error => {
         console.error('Ошибка: ', error);
         });
@@ -358,10 +392,7 @@ function FillRow(element){//редактируем поля которых не�
     }
     element.contentEditable = true;
     element.focus();
-    enterIsPressed = false;//нужно т.к при вызове onkeydown вызывается сразу же onblur
-    /*при потере фокуса, идёт поиск данной строки в БД,
-    идёт попытка присвоить полю новое значение,
-    если успешно то записывается,иначе возвращает ошибку*/
+    enterIsPressed = false;
     element.onkeydown = (event) => {if (event.key === 'Enter' && !enterIsPressed)  {enterIsPressed=true; requestTextUpdate(event, element);}}
     element.onblur = (event) => {if (!enterIsPressed) {requestTextUpdate(event, element)} enterIsPressed = false;}
 }
