@@ -28,12 +28,18 @@ sendData({},null,null,"POST","/get_str_neigh_dict/")
 function MakePatientDiagnosis(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)//Вывод списка пациентов с определённым диагнозом
 {
     let selectedText = e.params.data.text;
-        if (IsTextId)
-        {
-            let selectedValue = e.params.data.id;
-            sendData({"id":selectedValue},element,element,"POST", "/patient_diagnosis/",true);
-        }
-        else { sendData({"id":selectedText},element,element,"POST", "/patient_diagnosis/",true); }
+    let selectedValue = e.params.data.id;
+    sendData({"id":selectedValue},element,element,"POST", "/patient_diagnosis/",true);
+}
+
+function MakePatientDoctor(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)
+{
+    let selectedValue = e.params.data.id;
+    DataTime['id']=selectedValue;
+    sendData({"DataTime":DataTime},element,element,"POST", "/patient_doctor/",true)
+    .then(response => {
+        if (Object.keys(DataTime).length==3) { DataTime = {}; };
+        })
 }
 
 {
@@ -46,8 +52,37 @@ sendData({"field_name":"diagnosis","model_name":"Диагнозы"},null,null,"P
 });
 }
 
+{
+sendData({"field_name":"surname","model_name":"Врачи"},null,null,"POST", "/get_fields_by_name/")
+    .then(response => {
+        let patientLink = document.querySelector('[name="patient_doctor"]');
+        let parentList = patientLink.parentElement;
+        parentList.setAttribute('class','middle');
+        patientLink.addEventListener('click', function() {
+        const StartDataTimeFrame = document.createElement('input');
+        StartDataTimeFrame.setAttribute('type','datetime-local');
+        patientLink.insertAdjacentElement('afterend', StartDataTimeFrame);
+        const line = document.createElement('hr');
+        line.setAttribute('class','vertical ');
+        StartDataTimeFrame.insertAdjacentElement('afterend', line);
+        const EndDataTimeFrame = document.createElement('input');
+        EndDataTimeFrame.setAttribute('type','datetime-local');
+        line.insertAdjacentElement('afterend', EndDataTimeFrame);
+        StartDataTimeFrame.addEventListener('change',(e)=>{DataTime['StartDataTimeFrame']=StartDataTimeFrame.value;
+        sendData({"DataTime":DataTime},StartDataTimeFrame,StartDataTimeFrame,"POST", "/patient_doctor/",true)
+        .then(response => {
+        if (Object.keys(DataTime).length==3) { DataTime = {}; };})});
+        EndDataTimeFrame.addEventListener('change',(e)=>{DataTime['EndDataTimeFrame']=EndDataTimeFrame.value;
+        sendData({"DataTime":DataTime},EndDataTimeFrame,EndDataTimeFrame,"POST", "/patient_doctor/",true)
+        .then(response => {
+        if (Object.keys(DataTime).length==3) { DataTime = {}; };})});
+        createDropdown(patientLink,response.values,response.type,null,null,MakePatientDoctor,'div')
+        }) })
+}
 
-function ListForEdit(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)//[]функция для поведения - что будет если выбрать элемент в списке
+
+
+function ListForEdit(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)//функция для поведения - что будет если выбрать элемент в списке
 {
     let selectedText = e.params.data.text;
         if (IsTextId)
@@ -240,7 +275,7 @@ function sendData(data, element,new_element, method, dir,isFile=false) {
         csrfToken = getCsrfToken();
         let xhr = new XMLHttpRequest();
         xhr.open(method, dir, true);
-        if (isFile){xhr.responseType = 'blob';}
+        if (isFile & ((Object.keys(DataTime).length==0)|(Object.keys(DataTime).length==3))){xhr.responseType = 'blob';}
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("X-CSRFToken", csrfToken);
         let jsonData = JSON.stringify(data);
@@ -263,6 +298,8 @@ function sendData(data, element,new_element, method, dir,isFile=false) {
                     window.URL.revokeObjectURL(url);
                 }, 50);}
                 else {
+                    //console.log('data',data);
+                    //console.log('contentDisposition',contentDisposition);
                     const response = JSON.parse(xhr.responseText);
                     resolve(response); // Разрешаем промис с данными ответа
                         }

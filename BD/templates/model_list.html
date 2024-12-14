@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
     <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/model_list.css' %}?v=1001">
+    <link rel="stylesheet" href="{% static 'css/model_list.css' %}?v=3233">
     <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css'%}">
 </head>
 <body>
@@ -43,6 +43,7 @@
             {% if "Администрация" in user.groups.all|join:", "  %}
             <li><a href="/doc_neigh_doc">Список участков и участковых врачей</a></li>
             <li><a name = "patient_list" style="cursor: pointer;">Пациенты с диагнозом...</a></li>
+            <li><a name = "patient_doctor" style="cursor: pointer;">Пациенты находившиеся на приёме у...</a></li>
             {% endif %}
         </ul>
     </div>
@@ -84,6 +85,7 @@
             const model = "{{ h1 }}";
             const user_perm = "{{ user.get_all_permissions|join:", "}}";
             new_row = {};
+            DataTime = {};
             const fields = {{ fields_len }};
 
         </script>

@@ -23,4 +23,5 @@ urlpatterns = [
     path('doc_neigh_doc/',views.doc_neigh_doc, name='doc_neigh_doc'),#Вых.док - Вывод списка участков и участковых врачей
     path('ticket_print/',views.ticket_print, name='ticket_print'),#Вых.док - Вывод талонов
     path('patient_diagnosis/',views.patient_diagnosis, name='patient_diagnosis'),#Вых.док - Вывод списка пациентов с определённым диагнозом
+    path('patient_doctor/',views.patient_doctor, name='patient_doctor'),#Вых.док - Вывод списка пациентов побывавших на приеме у определенного врача за определенный период
 ]

@@ -240,6 +240,21 @@ th:last-child, td:last-child {
     background-color: #c82333;
 }
 
+hr.vertical {/* Вертикальная линия*/
+  width: 2px;
+  height: 25px;
+  background-color: black;
+  border: none;
+  margin: 0 auto;
+}
+
+.middle {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+
 /* Адаптивность */
 @media (max-width: 600px) {
     th, td {

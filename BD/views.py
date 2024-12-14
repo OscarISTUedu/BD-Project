@@ -208,10 +208,16 @@ def get_fields_by_name(request):#все значения для выпадающ
         values = cur_model.objects.values_list(field_name, flat=True).distinct()
         values = [item for item in values if item is not None]
         values.append("-") if cur_model._meta.get_field(field_name).null and cur_model._meta.get_field(field_name).blank else None
+    elif field_name in ["surname"] and cur_model._meta.verbose_name_plural=="Врачи":
+        values = Doctor.objects.values_list("id", "surname")
+        values = [item for item in values if item[0] is not None]
+        values = [(value1, value2 + ",№" + str(value1)) for value1, value2 in values]
+        values = sorted(values, key=lambda x: x[0])
+        return JsonResponse({"values": values, "type": "text&id"}, status=200)
     elif field_name in ["diagnosis"]:
         values = list(Diagnosis.objects.values_list("id", "diagnosis"))
         values = [item for item in values if item[0] is not None]  # убрали None
-        values.append((-1, "-")) if Diagnosis._meta.get_field(field_name).null and Diagnosis    ._meta.get_field(field_name).blank else None
+        values.append((-1, "-")) if Diagnosis._meta.get_field(field_name).null and Diagnosis._meta.get_field(field_name).blank else None
         values = sorted(values, key=lambda x: x[0])
         return JsonResponse({"values": values,"type":"text&id"}, status=200)
     else:#статус, улица(пациента)
@@ -405,3 +411,39 @@ def patient_diagnosis(request):#Вывод списка пациентов с о
     response['Content-Disposition'] = f"attachment; filename=\"patient_{diagnosis_name}.xlsx\""
     wb.save(response)
     return response
+
+@group_required(['Администрация'])
+def patient_doctor(request):#Вых.док - Вывод списка пациентов побывавших на приеме у определенного врача за определенный период
+    data = json.loads(request.body)
+    data = data['DataTime']
+    if len(data)==3:
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        sheet.title = "Пациенты"
+        headers = ["Номер", "Имя", "Фамилия", "Отчество", "Пол", "Дата рождения","Диагноз","Дата посещения"]
+        sheet.append(headers)
+        for col_num, header in enumerate(headers, start=1):
+            cell = sheet.cell(row=1, column=col_num)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        doctor_id = data['id']
+        doctor_surname = Doctor.objects.filter(id=doctor_id).first().surname
+        doctor_surname = transliterate(doctor_surname)
+        data_time_start = data['StartDataTimeFrame']
+        data_time_end = data['EndDataTimeFrame']
+        tickets = Ticket.objects.filter(doctor=doctor_id,date_n_time__range=[data_time_start,data_time_end],diagnosis__isnull=False)
+        for ticket in tickets:
+            third_name = "-" if ticket.patient.third_name is None else ticket.patient.third_name
+            sheet.append([ticket.patient.id, ticket.patient.name, ticket.patient.surname, third_name, ticket.patient.sex, ticket.patient.date_of_birth, ticket.diagnosis.diagnosis, ticket.date_n_time])
+        for column in sheet.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            sheet.column_dimensions[column_letter].width = max_length + 2
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f"attachment; filename=\"patients_{doctor_surname}.xlsx\""
+        wb.save(response)
+        return response
+    return JsonResponse ({},status=200)
