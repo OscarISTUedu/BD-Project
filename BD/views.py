@@ -286,7 +286,7 @@ def row_delete(request):
 def doc_neigh_doc(request):#Список участков и участковых врачей
     wb = openpyxl.Workbook()
     sheet  = wb.active
-    sheet.title = "Список участков и участковых врачей"
+    sheet.title = "Вых-ой документ"
     headers = ["Номер участка", "Имя доктора", "Фамилия доктора","Специальность доктора"]
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
@@ -305,7 +305,7 @@ def doc_neigh_doc(request):#Список участков и участковы�
                 max_length = max(max_length, len(str(cell.value)))
         sheet.column_dimensions[column_letter].width = max_length + 2  # Добавляем небольшой отступ
     # Создание ответа с Excel-файлом
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="doc_neigh_doc.xlsx"'
     # Сохранение книги в ответ
     wb.save(response)
