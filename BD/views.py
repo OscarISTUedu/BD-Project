@@ -282,11 +282,15 @@ def row_delete(request):
         return JsonResponse({"Ошибка удаления элемента"},status=500)
     return JsonResponse({},status=200)
 
+'''
+Выходные документы
+'''
+
 @group_required(['Пациенты','Администрация'])
 def doc_neigh_doc(request):#Список участков и участковых врачей
     wb = openpyxl.Workbook()
     sheet  = wb.active
-    sheet.title = "Вых-ой документ"
+    sheet.title = "Участки и врачи"
     headers = ["Номер участка", "Имя доктора", "Фамилия доктора","Специальность доктора"]
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
@@ -308,5 +312,29 @@ def doc_neigh_doc(request):#Список участков и участковы�
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="doc_neigh_doc.xlsx"'
     # Сохранение книги в ответ
+    wb.save(response)
+    return response
+
+@group_required(['Регистратура'])
+def ticket_print(request):
+    wb = openpyxl.Workbook()
+    sheet = wb.active
+    sheet.title = "Таблица талонов"
+    headers = ["Номер", "Дата и время приёма", "Врач,номер", "Пациент,номер","Цель посещения","Диагноз","Статус"]
+    sheet.append(headers)
+    tickets = Ticket.objects.all().order_by('id')
+    for ticket in tickets:
+        diagnosis = "-" if ticket.diagnosis is None else ticket.diagnosis.diagnosis
+        sheet.append([ticket.id, ticket.date_n_time,str(ticket.doctor.surname)+",№"+str(ticket.doctor.id) ,str(ticket.patient.surname)+",№"+str(ticket.patient.id),ticket.visit.visit,diagnosis,ticket.status])
+    for column in sheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        sheet.column_dimensions[column_letter].width = max_length + 2
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="ticket_print.xlsx"'
     wb.save(response)
     return response

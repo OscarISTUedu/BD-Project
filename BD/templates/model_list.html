@@ -38,10 +38,10 @@
             <li><a href="/doc_neigh_doc">Список участков и участковых врачей</a></li>
             {% endif %}
             {% if "Регистратура" in user.groups.all|join:", "  %}
-            <li></li>
+            <li><a href="/ticket_print">Таблица талонов</a></li>
             {% endif %}
             {% if "Администрация" in user.groups.all|join:", "  %}
-            <li></li>
+            <li><a href="/doc_neigh_doc">Список участков и участковых врачей</a></li>
             {% endif %}
 
         </ul>
