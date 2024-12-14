@@ -43,7 +43,6 @@
             {% if "Администрация" in user.groups.all|join:", "  %}
             <li><a href="/doc_neigh_doc">Список участков и участковых врачей</a></li>
             {% endif %}
-
         </ul>
     </div>
 
@@ -63,7 +62,6 @@
             {% load i18n %}
             {% language "en" %}
                     <tr>
-
                         {% for key,value in model.items %}
                         {% if key == "date_of_birth" %}
                         <td ondblclick="makeEditable(this)" name="{{key}}">{{value|date:"Y-m-d"}}</td>

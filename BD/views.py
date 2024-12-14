@@ -118,6 +118,12 @@ def change_view(request):
             if field.verbose_name == verbose_name_field:
                 cur_field_name = field.name
                 break
+    field = cur_model._meta.get_field(cur_field_name)
+    if new_data=="-":
+        if field.null and field.blank:
+            new_data = None
+        else:
+            return JsonResponse({"response": "Не верный формат"}, status=500)
     cur_obj = cur_model.objects.filter(id=row_id).first()
     if cur_obj:#если сущ-ет, то меняем, если нет, то
         try:
@@ -130,7 +136,6 @@ def change_view(request):
         except ValidationError as e:
             return JsonResponse({"response":e.messages[0]},status=500)
     else:
-        field = cur_model._meta.get_field(cur_field_name)
         try:
             field.clean(new_data, None)
         except Exception as e:
@@ -186,7 +191,11 @@ def get_fields_by_name(request):#все значения для выпадающ
         values = list(relatedModel.objects.values_list(field_cut[1],flat=True))
         values.sort()
         return JsonResponse({"values": values,"type":"id"}, status=200)
-    else:#статус, категория, улица(пациента)
+    elif field_name in ["category"]:
+        values = cur_model.objects.values_list(field_name, flat=True).distinct()
+        values = [item for item in values if item is not None]
+        values.append("-") if cur_model._meta.get_field(field_name).null and cur_model._meta.get_field(field_name).blank else None
+    else:#статус, улица(пациента)
         values = cur_model.objects.values_list(field_name,flat=True).distinct()
     if field_name in ["doctor_id","patient_id"]:
         values = relatedModel.objects.values_list("id","surname")
@@ -282,6 +291,11 @@ def row_delete(request):
         return JsonResponse({"Ошибка удаления элемента"},status=500)
     return JsonResponse({},status=200)
 
+
+def get_str_neigh_dict(request):
+    neighborhoods = list(Neighborhood.objects.all().values())
+    neighborhoods = dict([(str(id["id"]), id["neighborhood_street"]) for id in neighborhoods])
+    return JsonResponse (neighborhoods,status=200)
 '''
 Выходные документы
 '''

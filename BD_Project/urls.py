@@ -19,6 +19,7 @@ urlpatterns = [
     path('validate_field/', views.validate_field, name='validate_field'),
     path('row_add/', views.row_add, name='row_add'),
     path('row_delete/', views.row_delete, name='row_delete'),
+    path('get_str_neigh_dict/', views.get_str_neigh_dict, name='get_str_neigh_dict'),
     path('doc_neigh_doc/',views.doc_neigh_doc, name='doc_neigh_doc'),#Вых.док - Вывод списка участков и участковых врачей
     path('ticket_print/',views.ticket_print, name='ticket_print'),#Вых.док - Вывод талонов
 ]

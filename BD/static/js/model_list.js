@@ -1,3 +1,13 @@
+{
+let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');
+sendData({},null,null,"POST","/get_str_neigh_dict/")
+.then(response => {
+    let streetDict = response;
+    neighborhoodIdFields.forEach(element => {
+    element.setAttribute('title', streetDict[element.textContent]);})
+})
+}
+
 {//Проверка прав для удаления
     if (user_group != "Пациенты")
     {
@@ -310,9 +320,11 @@ function MakeAddingRow(element){//При клике на +, добавление
                             {newCell.ondblclick = function() { FillRow(this); };}
                             if (i==0) {newCell.textContent=new_id;new_row["id"]=new_id;} else
                             {
-                                newCell.textContent = headFields[i].textContent != "" ? '-' : '';
+                                newCell.textContent = headFields[i].textContent != "" ? '-' : '';//пустая клетка для крестика для удаления
                                 let tbody = tableBody.firstElementChild;
-                                newCell.setAttribute("name", tbody.children[i].getAttribute("Name"));
+                                let name = tbody.children[i].getAttribute("Name");
+                                newCell.setAttribute("name", name);
+                                if (name=="third_name" || name=="category" || name=="diagnosis_id") {new_row[name]=null;};
                             };
                             newRow.appendChild(newCell);
                         }
