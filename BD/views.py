@@ -17,6 +17,19 @@ from .authorisation import group_required
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
 from .validators import validate_status, validate_patient_id, validate_doctor_id, validate_empty
 
+def transliterate(text):
+    translit_dict = {
+        'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo', 'Ж': 'Zh', 'З': 'Z',
+        'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R',
+        'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch',
+        'Ы': 'Y', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
+
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z',
+        'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+        'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+    }
+    return ''.join([translit_dict.get(char, char) for char in text])
 
 @permission_required('BD.view_patient')
 def patient_list(request):
@@ -195,6 +208,12 @@ def get_fields_by_name(request):#все значения для выпадающ
         values = cur_model.objects.values_list(field_name, flat=True).distinct()
         values = [item for item in values if item is not None]
         values.append("-") if cur_model._meta.get_field(field_name).null and cur_model._meta.get_field(field_name).blank else None
+    elif field_name in ["diagnosis"]:
+        values = list(Diagnosis.objects.values_list("id", "diagnosis"))
+        values = [item for item in values if item[0] is not None]  # убрали None
+        values.append((-1, "-")) if Diagnosis._meta.get_field(field_name).null and Diagnosis    ._meta.get_field(field_name).blank else None
+        values = sorted(values, key=lambda x: x[0])
+        return JsonResponse({"values": values,"type":"text&id"}, status=200)
     else:#статус, улица(пациента)
         values = cur_model.objects.values_list(field_name,flat=True).distinct()
     if field_name in ["doctor_id","patient_id"]:
@@ -330,12 +349,15 @@ def doc_neigh_doc(request):#Список участков и участковы�
     return response
 
 @group_required(['Регистратура'])
-def ticket_print(request):
+def ticket_print(request):#Вывод талонов
     wb = openpyxl.Workbook()
     sheet = wb.active
     sheet.title = "Таблица талонов"
     headers = ["Номер", "Дата и время приёма", "Врач,номер", "Пациент,номер","Цель посещения","Диагноз","Статус"]
     sheet.append(headers)
+    for col_num, header in enumerate(headers, start=1):#Выравнивание
+        cell = sheet.cell(row=1, column=col_num)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
     tickets = Ticket.objects.all().order_by('id')
     for ticket in tickets:
         diagnosis = "-" if ticket.diagnosis is None else ticket.diagnosis.diagnosis
@@ -354,12 +376,32 @@ def ticket_print(request):
     return response
 
 @group_required(['Администрация'])
-def patient_diagnosis(request):
+def patient_diagnosis(request):#Вывод списка пациентов с определённым диагнозом
+    data = json.loads(request.body)
+    diagnosis_id = data.get('id')
+    diagnosis_name = Diagnosis.objects.filter(id=diagnosis_id).first().diagnosis
+    diagnosis_name = transliterate(diagnosis_name)
     wb = openpyxl.Workbook()
     sheet = wb.active
     sheet.title = "Пациенты"
-    #
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="ticket_print.xlsx"'
+    headers = ["Номер","Имя", "Фамилия", "Отчество", "Пол", "Дата рождения"]
+    sheet.append(headers)
+    for col_num, header in enumerate(headers, start=1):#Выравнивание
+        cell = sheet.cell(row=1, column=col_num)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    tickets = Ticket.objects.filter(diagnosis = diagnosis_id)
+    for ticket in tickets:
+        third_name = "-" if ticket.patient.third_name is None else ticket.patient.third_name
+        sheet.append([ticket.patient.id, ticket.patient.name, ticket.patient.surname, third_name, ticket.patient.sex, ticket.patient.date_of_birth])
+    for column in sheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        sheet.column_dimensions[column_letter].width = max_length + 2
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f"attachment; filename=\"patient_{diagnosis_name}.xlsx\""
     wb.save(response)
     return response

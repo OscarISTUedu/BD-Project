@@ -25,15 +25,15 @@ sendData({},null,null,"POST","/get_str_neigh_dict/")
 }
 
 
-function MakePatientDiagnosis(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)
+function MakePatientDiagnosis(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)//Вывод списка пациентов с определённым диагнозом
 {
     let selectedText = e.params.data.text;
         if (IsTextId)
         {
             let selectedValue = e.params.data.id;
-        } else
-        {
+            sendData({"id":selectedValue},element,element,"POST", "/patient_diagnosis/",true);
         }
+        else { sendData({"id":selectedText},element,element,"POST", "/patient_diagnosis/",true); }
 }
 
 {
@@ -235,20 +235,39 @@ function requestTextUpdate (event,element)
                     )
 
 }
-function sendData(data, element,new_element, method, dir) {
+function sendData(data, element,new_element, method, dir,isFile=false) {
     return new Promise((resolve, reject) => {
         csrfToken = getCsrfToken();
         let xhr = new XMLHttpRequest();
         xhr.open(method, dir, true);
+        if (isFile){xhr.responseType = 'blob';}
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("X-CSRFToken", csrfToken);
         let jsonData = JSON.stringify(data);
         xhr.onload = function () {
             let response;
             if (xhr.status == 200) {
-                response = JSON.parse(xhr.responseText);
-                resolve(response); // Разрешаем промис с данными ответа
-            } else {
+                const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                const contentType = xhr.getResponseHeader('Content-Type');
+            if (contentDisposition && contentDisposition.includes('attachment')) {
+                const blob = new Blob([xhr.response], { type: contentType });
+                const url = window.URL.createObjectURL(blob);
+                const filename = contentDisposition.split('filename=')[1]?.split(';')[0]?.replace(/['"]/g, '') || 'downloaded_file';
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;  // Название скачиваемого файла
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }, 50);}
+                else {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response); // Разрешаем промис с данными ответа
+                        }
+            }
+            else {
                 if (xhr.status != 304) {
                     response = JSON.parse(xhr.responseText);
                     showPopups(response.response);
