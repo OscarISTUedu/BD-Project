@@ -1,5 +1,5 @@
-{
-let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');//Подсказка при наведении на номер участка у доктора
+{//Подсказка при наведении на номер участка у доктора
+let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');
 sendData({},null,null,"POST","/get_str_neigh_dict/")
 .then(response => {
     let streetDict = response;
@@ -42,7 +42,7 @@ function MakePatientDoctor(e,element,new_td,id,type,IsTextId,TextIdFunc,IdFunc)
         })
 }
 
-{
+{//Вых документ
 sendData({"field_name":"diagnosis","model_name":"Диагнозы"},null,null,"POST", "/get_fields_by_name/")
     .then(response => {
         let patientLink = document.querySelector('[name="patient_list"]');
@@ -52,9 +52,11 @@ sendData({"field_name":"diagnosis","model_name":"Диагнозы"},null,null,"P
 });
 }
 
-{
+{//Вых документ
 sendData({"field_name":"surname","model_name":"Врачи"},null,null,"POST", "/get_fields_by_name/")
     .then(response => {
+        let changeOccurredStartTime = false;
+        let changeOccurredEndTime = false;
         let patientLink = document.querySelector('[name="patient_doctor"]');
         let parentList = patientLink.parentElement;
         parentList.setAttribute('class','middle');
@@ -68,14 +70,37 @@ sendData({"field_name":"surname","model_name":"Врачи"},null,null,"POST", "/
         const EndDataTimeFrame = document.createElement('input');
         EndDataTimeFrame.setAttribute('type','datetime-local');
         line.insertAdjacentElement('afterend', EndDataTimeFrame);
-        StartDataTimeFrame.addEventListener('change',(e)=>{DataTime['StartDataTimeFrame']=StartDataTimeFrame.value;
-        sendData({"DataTime":DataTime},StartDataTimeFrame,StartDataTimeFrame,"POST", "/patient_doctor/",true)
-        .then(response => {
-        if (Object.keys(DataTime).length==3) { DataTime = {}; };})});
-        EndDataTimeFrame.addEventListener('change',(e)=>{DataTime['EndDataTimeFrame']=EndDataTimeFrame.value;
-        sendData({"DataTime":DataTime},EndDataTimeFrame,EndDataTimeFrame,"POST", "/patient_doctor/",true)
-        .then(response => {
-        if (Object.keys(DataTime).length==3) { DataTime = {}; };})});
+        StartDataTimeFrame.addEventListener
+        ('change',(e)=>
+            {
+                changeOccurredStartTime = true;
+            }
+        );
+        StartDataTimeFrame.addEventListener('blur', function() {
+        if (changeOccurredStartTime)
+        {
+            DataTime['StartDataTimeFrame']=StartDataTimeFrame.value;
+            sendData({"DataTime":DataTime},StartDataTimeFrame,StartDataTimeFrame,"POST", "/patient_doctor/",true)
+            .then(response =>{ if (Object.keys(DataTime).length==3) { DataTime = {}; }; } )
+        }
+        changeOccurredStartTime = false;
+        });
+
+        EndDataTimeFrame.addEventListener
+        ('change',(e)=>
+            {
+                changeOccurredEndTime = true;
+            }
+        );
+        EndDataTimeFrame.addEventListener('blur', function() {
+        if (changeOccurredEndTime)
+        {
+            DataTime['EndDataTimeFrame']=EndDataTimeFrame.value;
+            sendData({"DataTime":DataTime},EndDataTimeFrame,EndDataTimeFrame,"POST", "/patient_doctor/",true)
+            .then(response => { if (Object.keys(DataTime).length==3) { DataTime = {}; }; } )
+        }
+        changeOccurredEndTime = false;
+        });
         createDropdown(patientLink,response.values,response.type,null,null,MakePatientDoctor,'div')
         }) })
 }
@@ -298,8 +323,6 @@ function sendData(data, element,new_element, method, dir,isFile=false) {
                     window.URL.revokeObjectURL(url);
                 }, 50);}
                 else {
-                    //console.log('data',data);
-                    //console.log('contentDisposition',contentDisposition);
                     const response = JSON.parse(xhr.responseText);
                     resolve(response); // Разрешаем промис с данными ответа
                         }
