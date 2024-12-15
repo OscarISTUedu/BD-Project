@@ -236,7 +236,8 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Врачи":"doctor",
             "Талоны":"ticket",
             "Диагнозы":"diagnosis"}
-        if (user_perm.includes("change_"+model_dict[model]))
+        console.log(element.name);
+        if (user_perm.includes("change_"+model_dict[model]))//|(!user_perm.includes("change_"+model_dict[model]))
         {
             let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id"];
             last_data = element.innerText;

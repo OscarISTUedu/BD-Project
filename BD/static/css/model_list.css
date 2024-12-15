@@ -1,9 +1,11 @@
 /* Основные стили для страницы */
 body {
+    min-height: 100vh;
     font-family: Arial, sans-serif;
     background-color: #f2f2f2;
     display: grid;
     grid-template-columns: 10% auto;
+    column-gap: 7%;
     margin-left:0px;
     margin-top:0px;
 }
@@ -11,29 +13,29 @@ h1 {
     text-align: center;
     color: #333;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 2%;
 }
 
 /* Панель навигации слева */
 .sidebar {
     grid-column: 1;
-    width: 220px;
+    width: 100%;
     background-color: #4CAF50;
     color: white;
-    padding: 5px;
-    height: 100%;
+    padding: 5%;
+    height: 100vh;
 }
 .sidebar h2 {
     text-align: center;
-    font-size: 20px;
+    font-size: 140%;
 }
 .sidebar ul {
     list-style-type: none;
     padding: 0;
 }
 .sidebar ul li {
-    margin: 10px 0;
-    font-size: 18px;
+    margin: 5% 0;
+    font-size: 110%;
 }
 .sidebar ul li a {
     color: white;
@@ -46,7 +48,6 @@ h1 {
 /* Таблицы */
 .content {
     grid-column:2;
-    padding: 0 0 0 14em;
     justify-content: center;
 }
 
@@ -198,7 +199,6 @@ th:last-child, td:last-child {
     background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
 }
 
-/* Стили модального окна */
 .modal-content {
     position: absolute;
     top: 50%;
@@ -211,7 +211,7 @@ th:last-child, td:last-child {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Стили кнопок */
+/* Стили кнопок модального окна*/
 .btn_modal {
     margin: 10px;
     padding: 10px 20px;

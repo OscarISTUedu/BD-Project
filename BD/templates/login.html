@@ -1,10 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Вход в систему</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}?v={{ timestamp }}">
 </head>
 <body>
     <h2>Авторизация</h2>
@@ -28,3 +28,4 @@
     {% endif %}
 </body>
 </html>
+<!-- ?v={{ timestamp }} -->

@@ -103,6 +103,11 @@ change_visit_permission = Permission.objects.get_or_create(
     codename='change_visit',
     name='Can change visit',
     content_type=visit_content_type,)
+change_diagnosis_in_ticket_permission = Permission.objects.get_or_create(
+    codename='change_diagnosis_in_ticket',
+    name='Can change diagnosis in ticket',
+    content_type=ticket_content_type,
+)
 
 #Удаление
 
@@ -162,16 +167,16 @@ admin_permission = Permission.objects.filter(codename__in=['view_doctor', 'view_
                                                            'add_doctor','add_patient','add_ticket','add_diagnosis','add_neighborhood','add_visit',
                                                            'delete_doctor','delete_patient','delete_ticket','delete_diagnosis','delete_neighborhood','delete_visit',
                                                            'change_doctor','change_patient','change_ticket','change_diagnosis','change_neighborhood','change_visit'])
-doctor_permission = Permission.objects.filter(codename__in=['view_doctor', 'view_patient','view_ticket','view_diagnosis','change_ticket'])
+doctor_permission = Permission.objects.filter(codename__in=['view_doctor', 'view_patient','view_ticket','view_diagnosis','change_ticket','change_diagnosis_in_ticket'])
 patient_permission = Permission.objects.filter(codename__in=['view_doctor', 'view_neighborhood'])
 reception_permission = Permission.objects.filter(codename__in=['view_patient', 'view_neighborhood','add_neighborhood','delete_neighborhood','change_neighborhood','view_ticket','add_ticket','delete_ticket','change_ticket'])
 
-'''
+
 DoctorGroup.permissions.set(doctor_permission)
 PatientGroup.permissions.set(patient_permission)
 AdminGroup.permissions.set(admin_permission)
 ReceptionGroup.permissions.set(reception_permission)
-
+'''
 first = User.objects.filter(username='doctor_A')[0]
 first.groups.add(DoctorGroup)
 
