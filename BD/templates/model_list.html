@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Районная больница</title>
     <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/model_list.css' %}?v=333">
+    <link rel="stylesheet" href="{% static 'css/model_list.css' %}?v=2211">
     <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css'%}">
 </head>
 <body>
@@ -47,7 +47,7 @@
             {% endif %}
         </ul>
     </div>
-
+    <div style="grid-column: 2;"></div>
     <!-- Основной контент -->
     <div class="content">
         <h1>{{ h1 }}</h1>
@@ -91,13 +91,14 @@
     </div>
     <!-- Плюсик для добавления данных -->
     {% if "Регистратура" in user.groups.all|join:", "%}
-        {%if h1 == "Талоны" or h1 == "Участки" %}
+        {%if h1 == "Талоны" or h1 == "Участки" or h1 == "Пациенты" %}
         <div class="plus radius" onclick="MakeAddingRow(this)"></div>
         {% endif %}
     {% endif %}
     {% if "Администрация" in user.groups.all|join:", " %}
     <div class="plus radius" onclick="MakeAddingRow(this)"></div>
     {% endif %}
+    <div name="gap"></div>
     <!-- Аккаунт пользователя -->
     <div class="user-panel">
             {% if user.is_authenticated %}

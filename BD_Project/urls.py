@@ -1,6 +1,6 @@
 from django.urls import path
 from BD import views
-#from BD.authorisation import AdminGroup
+#import BD.authorisation
 
 urlpatterns = [
     path('patients/', views.patient_list, name='patient_list'),

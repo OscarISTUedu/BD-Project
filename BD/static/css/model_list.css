@@ -4,8 +4,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f2f2f2;
     display: grid;
-    grid-template-columns: 10% auto;
-    column-gap: 7%;
+    grid-template-columns: 10% 7% auto 1% 7% 10%;
     margin-left:0px;
     margin-top:0px;
 }
@@ -18,7 +17,7 @@ h1 {
 
 /* Панель навигации слева */
 .sidebar {
-    grid-column: 1;
+    grid-column: 1
     width: 100%;
     background-color: #4CAF50;
     color: white;
@@ -47,8 +46,8 @@ h1 {
 
 /* Таблицы */
 .content {
-    grid-column:2;
     justify-content: center;
+    grid-column: 3
 }
 
 /* Таблица */
@@ -89,6 +88,7 @@ th:last-child, td:last-child {
   margin-top: 2vw;
   width:40px;
   height:40px;
+  margin-left: 0;
 
   background:
     linear-gradient(#fff,#fff),/* Линии на кнопке */
@@ -105,12 +105,11 @@ th:last-child, td:last-child {
 /* Аккаунт пользователя */
 .user-panel {
     background-color: #4CAF50;
-    width: 200px;
+    width: 100%;
     height: 100vh;
     color: white;
     padding: 20px;
     box-sizing: border-box;
-    grid-column:4;
 }
 .user-panel h2 {
     margin-top: 0;

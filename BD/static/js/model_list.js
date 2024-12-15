@@ -1,3 +1,22 @@
+{
+    let plusBtn = document.getElementsByClassName("plus radius");
+    let plusBtnAmount = plusBtn.length;
+    let userProfile = document.getElementsByClassName("user-panel");
+    let gap = document.getElementsByClassName("gap");
+    if (plusBtnAmount>0)
+    {
+        plusBtn[0].setAttribute("style", "grid-column: 4;");
+        gap.setAttribute("style", "grid-column: 5;");
+        userProfile[0].setAttribute("style", "grid-column: 6;");
+    }
+    else
+    {
+        gap.setAttribute("style", "grid-column: 4;");
+        userProfile[0].setAttribute("style", "grid-column: 5;");
+    }
+}
+
+
 {//Подсказка при наведении на номер участка у доктора
 let neighborhoodIdFields = document.querySelectorAll('[name="neighborhood_id"]');
 sendData({},null,null,"POST","/get_str_neigh_dict/")
@@ -236,8 +255,8 @@ function makeEditable(element) {//при клике на ячейку она с�
             "Врачи":"doctor",
             "Талоны":"ticket",
             "Диагнозы":"diagnosis"}
-        console.log(element.name);
-        if (user_perm.includes("change_"+model_dict[model]))//|(!user_perm.includes("change_"+model_dict[model]))
+        console.log(element);
+        if ((user_perm.includes("change_"+model_dict[model]))||((user_perm.includes("change_"+"diagnosis_in_"+model_dict[model]))&(element.getAttribute('Name')=="diagnosis_id")))
         {
             let list_fields = ["category","status","street","neighborhood_id","visit_id","diagnosis_id","doctor_id","patient_id"];
             last_data = element.innerText;
