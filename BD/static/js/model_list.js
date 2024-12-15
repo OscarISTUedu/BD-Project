@@ -2,7 +2,7 @@
     let plusBtn = document.getElementsByClassName("plus radius");
     let plusBtnAmount = plusBtn.length;
     let userProfile = document.getElementsByClassName("user-panel");
-    let gap = document.getElementsByClassName("gap");
+    let gap = document.querySelector('[name="gap"]');
     if (plusBtnAmount>0)
     {
         plusBtn[0].setAttribute("style", "grid-column: 4;");
