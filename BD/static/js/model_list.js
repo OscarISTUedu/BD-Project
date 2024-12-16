@@ -10,8 +10,6 @@
         gap.setAttribute("style", "grid-column: 5;");
         userProfile[0].setAttribute("style", "grid-column: 6;");
         body.setAttribute("style", "grid-template-columns: 10% 7% auto 1% 6% 10%;");
-        plusBtn[0].style.visibility = 'visible';
-        userProfile[0].style.visibility = 'visible';
         body.style.visibility = 'visible';
 
     }
@@ -20,7 +18,6 @@
         gap.setAttribute("style", "grid-column: 4;");
         userProfile[0].setAttribute("style", "grid-column: 5;");
         body.setAttribute("style", "grid-template-columns: 10% 7% auto 7% 10%;");
-        userProfile[0].style.visibility = 'visible';
         body.style.visibility = 'visible';
     }
 }
