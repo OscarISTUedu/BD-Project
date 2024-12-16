@@ -3,16 +3,20 @@
     let plusBtnAmount = plusBtn.length;
     let userProfile = document.getElementsByClassName("user-panel");
     let gap = document.querySelector('[name="gap"]');
+    let body = document.querySelector('body');
     if (plusBtnAmount>0)
     {
         plusBtn[0].setAttribute("style", "grid-column: 4;");
         gap.setAttribute("style", "grid-column: 5;");
         userProfile[0].setAttribute("style", "grid-column: 6;");
+        body.setAttribute("style", "grid-template-columns: 10% 7% auto 1% 6% 10%;");
+
     }
     else
     {
         gap.setAttribute("style", "grid-column: 4;");
         userProfile[0].setAttribute("style", "grid-column: 5;");
+        body.setAttribute("style", "grid-template-columns: 10% 7% auto 7% 10%;");
     }
 }
 
