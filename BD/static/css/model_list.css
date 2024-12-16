@@ -89,7 +89,6 @@ th:last-child, td:last-child {
   width:40px;
   height:40px;
   margin-left: 0;
-  visibility: hidden;
 
   background:
     linear-gradient(#fff,#fff),/* Линии на кнопке */
@@ -105,7 +104,6 @@ th:last-child, td:last-child {
 
 /* Аккаунт пользователя */
 .user-panel {
-    visibility: hidden;
     background-color: #4CAF50;
     width: 100%;
     color: white;
