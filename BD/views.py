@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from types import NoneType
 
 import openpyxl
@@ -333,12 +334,12 @@ def doc_neigh_doc(request):#Список участков и участковы�
     sheet.title = "Участки и врачи"
     headers = ["Номер участка", "Имя доктора", "Фамилия доктора","Специальность доктора"]
     list_title = "Список участков и участковых врачей"
-    merge_range = f'A1:{get_column_letter(len(headers))}'
+    merge_range = f'A1:{get_column_letter(len(headers))}1'
     sheet.merge_cells(merge_range)
     sheet['A1'] = list_title
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
-        cell = sheet.cell(row=2, column=col_num)
+        cell = sheet.cell(row=1, column=col_num)
         cell.alignment = Alignment(horizontal="center", vertical="center")
     neighborhoods = Neighborhood.objects.prefetch_related('doctor').order_by('id')
     for neighborhood in neighborhoods:
@@ -346,12 +347,19 @@ def doc_neigh_doc(request):#Список участков и участковы�
             sheet.append([neighborhood.id, doctor.name, doctor.surname, doctor.speciality])
     for column in sheet.columns:#увеличение ширины столбцов
         max_length = 0
-        column_letter = column[0].column_letter  # Получаем букву столбца
+        column_letter = column[1].column_letter  # Получаем букву столбца
         for cell in column:
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            if cell.value:
+            if cell.value and cell.value!=list_title:
                 max_length = max(max_length, len(str(cell.value)))
         sheet.column_dimensions[column_letter].width = max_length + 2  # Добавляем небольшой отступ
+    last_row = sheet.max_row
+    start_cell = f'A{last_row + 1}'  # Первая ячейка в строке
+    end_column = get_column_letter(len(headers))  # Получаем букву i-го столбца
+    end_cell = f'{end_column}{last_row + 1}'  # Последняя ячейка в строке
+    sheet.merge_cells(f'{start_cell}:{end_cell}')
+    sheet[f'{start_cell}'] = 'Дата: ' + str(datetime.today().date())
+    sheet[f'{start_cell}'].alignment = Alignment(horizontal="center", vertical="center")
     # Создание ответа с Excel-файлом
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="doc_neigh_doc.xlsx"'
@@ -365,6 +373,10 @@ def ticket_print(request):#Вывод талонов
     sheet = wb.active
     sheet.title = "Таблица талонов"
     headers = ["Номер", "Дата и время приёма", "Врач,номер", "Пациент,номер","Цель посещения","Диагноз","Статус"]
+    list_title = "Список талонов"
+    merge_range = f'A1:{get_column_letter(len(headers))}1'
+    sheet.merge_cells(merge_range)
+    sheet['A1'] = list_title
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
         cell = sheet.cell(row=1, column=col_num)
@@ -375,12 +387,19 @@ def ticket_print(request):#Вывод талонов
         sheet.append([ticket.id, ticket.date_n_time,str(ticket.doctor.surname)+",№"+str(ticket.doctor.id) ,str(ticket.patient.surname)+",№"+str(ticket.patient.id),ticket.visit.visit,diagnosis,ticket.status])
     for column in sheet.columns:
         max_length = 0
-        column_letter = column[0].column_letter
+        column_letter = column[1].column_letter
         for cell in column:
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            if cell.value:
+            if cell.value and cell.value!=list_title:
                 max_length = max(max_length, len(str(cell.value)))
         sheet.column_dimensions[column_letter].width = max_length + 2
+    last_row = sheet.max_row
+    start_cell = f'A{last_row + 1}'  # Первая ячейка в строке
+    end_column = get_column_letter(len(headers))  # Получаем букву i-го столбца
+    end_cell = f'{end_column}{last_row + 1}'  # Последняя ячейка в строке
+    sheet.merge_cells(f'{start_cell}:{end_cell}')
+    sheet[f'{start_cell}'] = 'Дата: ' + str(datetime.today().date())
+    sheet[f'{start_cell}'].alignment = Alignment(horizontal="center", vertical="center")
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="ticket_print.xlsx"'
     wb.save(response)
@@ -390,12 +409,16 @@ def ticket_print(request):#Вывод талонов
 def patient_diagnosis(request):#Вывод списка пациентов с определённым диагнозом
     data = json.loads(request.body)
     diagnosis_id = data.get('id')
-    diagnosis_name = Diagnosis.objects.filter(id=diagnosis_id).first().diagnosis
-    diagnosis_name = transliterate(diagnosis_name)
+    diagnosis_name_rus = Diagnosis.objects.filter(id=diagnosis_id).first().diagnosis
+    diagnosis_name = transliterate(diagnosis_name_rus)
     wb = openpyxl.Workbook()
     sheet = wb.active
     sheet.title = "Пациенты"
     headers = ["Номер","Имя", "Фамилия", "Отчество", "Пол", "Дата рождения"]
+    list_title = f"Список пациентов с диагнозом {diagnosis_name_rus}"
+    merge_range = f'A1:{get_column_letter(len(headers))}1'
+    sheet.merge_cells(merge_range)
+    sheet['A1'] = list_title
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
         cell = sheet.cell(row=1, column=col_num)
@@ -406,12 +429,19 @@ def patient_diagnosis(request):#Вывод списка пациентов с о
         sheet.append([ticket.patient.id, ticket.patient.name, ticket.patient.surname, third_name, ticket.patient.sex, ticket.patient.date_of_birth])
     for column in sheet.columns:
         max_length = 0
-        column_letter = column[0].column_letter
+        column_letter = column[1].column_letter
         for cell in column:
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            if cell.value:
+            if cell.value and cell.value!=list_title:
                 max_length = max(max_length, len(str(cell.value)))
         sheet.column_dimensions[column_letter].width = max_length + 2
+    last_row = sheet.max_row
+    start_cell = f'A{last_row + 1}'  # Первая ячейка в строке
+    end_column = get_column_letter(len(headers))  # Получаем букву i-го столбца
+    end_cell = f'{end_column}{last_row + 1}'  # Последняя ячейка в строке
+    sheet.merge_cells(f'{start_cell}:{end_cell}')
+    sheet[f'{start_cell}'] = 'Дата: ' + str(datetime.today().date())
+    sheet[f'{start_cell}'].alignment = Alignment(horizontal="center", vertical="center")
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f"attachment; filename=\"patient_{diagnosis_name}.xlsx\""
     wb.save(response)
@@ -422,31 +452,42 @@ def patient_doctor(request):#Вых.док - Вывод списка пацие�
     data = json.loads(request.body)
     data = data['DataTime']
     if len(data)==3:
+        doctor_id = data['id']
+        doctor_surname_rus = Doctor.objects.filter(id=doctor_id).first().surname
+        doctor_surname = transliterate(doctor_surname_rus)
+        data_time_start = data['StartDataTimeFrame']
+        data_time_end = data['EndDataTimeFrame']
         wb = openpyxl.Workbook()
         sheet = wb.active
         sheet.title = "Пациенты"
         headers = ["Номер", "Имя", "Фамилия", "Отчество", "Пол", "Дата рождения","Диагноз","Дата посещения"]
+        list_title = f"Список пациентов побывавших на приеме у {doctor_surname_rus} за {data_time_start} - {data_time_end}"
+        merge_range = f'A1:{get_column_letter(len(headers))}1'
+        sheet.merge_cells(merge_range)
+        sheet['A1'] = list_title
         sheet.append(headers)
         for col_num, header in enumerate(headers, start=1):
             cell = sheet.cell(row=1, column=col_num)
             cell.alignment = Alignment(horizontal="center", vertical="center")
-        doctor_id = data['id']
-        doctor_surname = Doctor.objects.filter(id=doctor_id).first().surname
-        doctor_surname = transliterate(doctor_surname)
-        data_time_start = data['StartDataTimeFrame']
-        data_time_end = data['EndDataTimeFrame']
         tickets = Ticket.objects.filter(doctor=doctor_id,date_n_time__range=[data_time_start,data_time_end],diagnosis__isnull=False)
         for ticket in tickets:
             third_name = "-" if ticket.patient.third_name is None else ticket.patient.third_name
             sheet.append([ticket.patient.id, ticket.patient.name, ticket.patient.surname, third_name, ticket.patient.sex, ticket.patient.date_of_birth, ticket.diagnosis.diagnosis, ticket.date_n_time])
         for column in sheet.columns:
             max_length = 0
-            column_letter = column[0].column_letter
+            column_letter = column[1].column_letter
             for cell in column:
                 cell.alignment = Alignment(horizontal="center", vertical="center")
-                if cell.value:
+                if cell.value and cell.value!=list_title:
                     max_length = max(max_length, len(str(cell.value)))
             sheet.column_dimensions[column_letter].width = max_length + 2
+        last_row = sheet.max_row
+        start_cell = f'A{last_row + 1}'  # Первая ячейка в строке
+        end_column = get_column_letter(len(headers))  # Получаем букву i-го столбца
+        end_cell = f'{end_column}{last_row + 1}'  # Последняя ячейка в строке
+        sheet.merge_cells(f'{start_cell}:{end_cell}')
+        sheet[f'{start_cell}'] = 'Дата: ' + str(datetime.today().date())
+        sheet[f'{start_cell}'].alignment = Alignment(horizontal="center", vertical="center")
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f"attachment; filename=\"patients_{doctor_surname}.xlsx\""
         wb.save(response)
