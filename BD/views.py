@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect
 
 from django.apps import apps
 from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 
 from .authorisation import group_required
 from .models import Patient, Doctor, Neighborhood, Diagnosis, Visit, Ticket
@@ -331,9 +332,13 @@ def doc_neigh_doc(request):#Список участков и участковы�
     sheet  = wb.active
     sheet.title = "Участки и врачи"
     headers = ["Номер участка", "Имя доктора", "Фамилия доктора","Специальность доктора"]
+    list_title = "Список участков и участковых врачей"
+    merge_range = f'A1:{get_column_letter(len(headers))}'
+    sheet.merge_cells(merge_range)
+    sheet['A1'] = list_title
     sheet.append(headers)
     for col_num, header in enumerate(headers, start=1):#Выравнивание
-        cell = sheet.cell(row=1, column=col_num)
+        cell = sheet.cell(row=2, column=col_num)
         cell.alignment = Alignment(horizontal="center", vertical="center")
     neighborhoods = Neighborhood.objects.prefetch_related('doctor').order_by('id')
     for neighborhood in neighborhoods:
