@@ -16,6 +16,7 @@
             {% if "Врачи" in user.groups.all|join:", " %}
             <li><a href="/patients">Пациенты</a></li>
             <li><a href="/tickets">Талоны посещения</a></li>
+            <li><a href="/doctors">Врачи</a></li>
             {% elif "Пациенты" in user.groups.all|join:", " %}
             <li><a href="/doctors">Врачи</a></li>
             <li><a href="/neighborhoods">Участки</a></li>
