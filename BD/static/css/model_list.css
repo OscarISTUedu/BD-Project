@@ -89,6 +89,7 @@ th:last-child, td:last-child {
   width:40px;
   height:40px;
   margin-left: 0;
+  z-index: 1;
 
   background:
     linear-gradient(#fff,#fff),/* Линии на кнопке */
