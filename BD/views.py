@@ -110,6 +110,7 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+@login_required
 def main_view(request):
     return render(request, 'main.html')
 
